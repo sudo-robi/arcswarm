@@ -13,12 +13,14 @@ contract MockUSDC is IERC20 {
     string public name = "USD Coin";
     string public symbol = "USDC";
     uint8 public decimals = 6;
+    uint256 public totalSupply;
 
     mapping(address => uint256) public override balanceOf;
     mapping(address => mapping(address => uint256)) public override allowance;
 
     function mint(address to, uint256 amount) external {
         balanceOf[to] += amount;
+        totalSupply += amount;
     }
 
     function approve(address spender, uint256 amount) external returns (bool) {
@@ -66,14 +68,19 @@ contract ArcSwarmTest is Test {
             address(riskOracle)
         );
 
-        // Setup roles
         bytes32 coordinatorRole = keccak256("COORDINATOR_ROLE");
         bytes32 agentRole = keccak256("AGENT_ROLE");
+        bytes32 riskAgentRole = keccak256("RISK_AGENT_ROLE");
 
         vault.grantRole(coordinatorRole, admin);
         budgetManager.grantRole(coordinatorRole, address(vault));
+        paymentRouter.grantRole(coordinatorRole, admin);
+        paymentRouter.grantRole(agentRole, yieldAgent);
+        paymentRouter.grantRole(agentRole, riskAgent);
 
-        // Register agents
+        // Grant RISK_AGENT_ROLE to admin so tests can call updateMetrics
+        riskOracle.grantRole(riskAgentRole, admin);
+
         agentRegistry.registerAgent(
             yieldAgent,
             keccak256("YIELD-001"),
@@ -90,7 +97,6 @@ contract ArcSwarmTest is Test {
         vault.grantRole(agentRole, yieldAgent);
         vault.grantRole(agentRole, riskAgent);
 
-        // Mint USDC for testing
         usdc.mint(alice, 100_000e6);
         usdc.mint(admin, 1_000_000e6);
     }
@@ -118,23 +124,24 @@ contract ArcSwarmTest is Test {
     }
 
     function testAgentAllocation() public {
-        // Deposit to vault
         vm.startPrank(alice);
         usdc.approve(address(vault), 50_000e6);
         vault.deposit(50_000e6);
         vm.stopPrank();
 
-        // Allocate to yield agent
+        // Warp past the allocation cooldown (60s default)
+        vm.warp(block.timestamp + 61);
+
         vault.allocateToAgent(yieldAgent, 15_000e6);
 
         assertEq(usdc.balanceOf(yieldAgent), 15_000e6);
     }
 
     function testNanopayment() public {
-        // Fund yield agent
         usdc.mint(yieldAgent, 10_000e6);
 
         vm.startPrank(yieldAgent);
+        usdc.approve(address(paymentRouter), 10_000e6);
         paymentRouter.executeNanopayment(riskAgent, 1000, "risk-check");
         vm.stopPrank();
 
@@ -157,31 +164,32 @@ contract ArcSwarmTest is Test {
         memos[1] = "risk allocation";
         memos[2] = "user refund";
 
-        vault.executeBatchPayments(recipients, amounts, memos);
+        usdc.approve(address(paymentRouter), 10_000e6);
+        paymentRouter.executeBatchPayments(recipients, amounts, memos);
 
         assertEq(paymentRouter.getPaymentCount(), 3);
     }
 
     function testCircuitBreaker() public {
-        riskOracle.updateMetrics(150_000e6, 600); // 6% drawdown > 5% threshold
+        riskOracle.updateMetrics(150_000e6, 600);
         assertTrue(riskOracle.isPaused());
     }
 
     function testRiskScore() public {
-        riskOracle.updateMetrics(50_000e6, 200); // 2% drawdown
+        riskOracle.updateMetrics(50_000e6, 200);
         (, uint256 score) = riskOracle.checkHealth();
         assertTrue(score > 0);
         assertTrue(score < 100);
     }
 
-    function testAgentRegistry() public {
+    function testAgentRegistry() public view {
         assertTrue(agentRegistry.isAgent(yieldAgent));
         assertEq(agentRegistry.getAgentCount(), 2);
     }
 
     function testReputationUpdate() public {
         agentRegistry.updateReputation(yieldAgent, 10, "Good yield performance");
-        (, , , , uint256 score, , ) = agentRegistry.getAgentInfo(yieldAgent);
-        assertEq(score, 60); // 50 + 10
+        AgentRegistry.AgentInfo memory info = agentRegistry.getAgentInfo(yieldAgent);
+        assertEq(info.reputationScore, 60);
     }
 }

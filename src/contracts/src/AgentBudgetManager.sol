@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract AgentBudgetManager is AccessControl, ReentrancyGuard {
     bytes32 public constant COORDINATOR_ROLE = keccak256("COORDINATOR_ROLE");
@@ -78,7 +78,7 @@ contract AgentBudgetManager is AccessControl, ReentrancyGuard {
         return budgets[agent].spent;
     }
 
-    function getRemaining(address agent) external view returns (uint256) {
+    function getRemaining(address agent) public view returns (uint256) {
         AgentBudget memory b = budgets[agent];
         if (b.allocated <= b.spent) return 0;
         return b.allocated - b.spent;
