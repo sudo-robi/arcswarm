@@ -10,7 +10,7 @@ import "../src/PaymentRouter.sol";
 
 contract DeployArcSwarm is Script {
     // Arc Testnet USDC address - update for actual deployment
-    address constant USDC_ADDRESS = 0x1234567890AbcdEF1234567890aBcdef12345678;
+    address constant USDC_ADDRESS = 0x3600000000000000000000000000000000000000;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

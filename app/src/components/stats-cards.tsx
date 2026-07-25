@@ -1,29 +1,65 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import {
+  ARC_TESTNET,
+  CONTRACTS,
+  VAULT_ABI,
+  AGENT_REGISTRY_ABI,
+  BUDGET_MANAGER_ABI,
+  RISK_ORACLE_ABI,
+  PAYMENT_ROUTER_ABI,
+} from "@/lib/contracts";
 
 interface Stats {
   totalAgents: number;
   activeAgents: number;
-  totalBudget: string;
-  totalSpent: string;
+  totalBalance: string;
+  totalDeposits: string;
   totalTransactions: number;
-  unresolvedAlerts: number;
+  riskScore: number;
 }
 
 export function StatsCards() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
-    // In production: fetch from API
-    setStats({
-      totalAgents: 6,
-      activeAgents: 6,
-      totalBudget: "100000000000", // 100,000 USDC
-      totalSpent: "23456789012", // 23,456 USDC
-      totalTransactions: 847,
-      unresolvedAlerts: 0,
-    });
+    const fetchStats = async () => {
+      try {
+        const provider = new ethers.JsonRpcProvider(ARC_TESTNET.rpcUrl);
+
+        const vault = new ethers.Contract(CONTRACTS.vault, VAULT_ABI, provider);
+        const registry = new ethers.Contract(CONTRACTS.agentRegistry, AGENT_REGISTRY_ABI, provider);
+        const budgetMgr = new ethers.Contract(CONTRACTS.budgetManager, BUDGET_MANAGER_ABI, provider);
+        const riskOracle = new ethers.Contract(CONTRACTS.riskOracle, RISK_ORACLE_ABI, provider);
+        const paymentRouter = new ethers.Contract(CONTRACTS.paymentRouter, PAYMENT_ROUTER_ABI, provider);
+
+        const [totalBalance, totalDeposits, agentCount, activeCount, paymentCount, riskScore] = await Promise.all([
+          vault.getVaultBalance(),
+          vault.totalDeposits(),
+          registry.getAgentCount(),
+          budgetMgr.getAgentCount(),
+          paymentRouter.getPaymentCount(),
+          riskOracle.getRiskScore(),
+        ]);
+
+        setStats({
+          totalAgents: Number(agentCount),
+          activeAgents: Number(activeCount),
+          totalBalance: totalBalance.toString(),
+          totalDeposits: totalDeposits.toString(),
+          totalTransactions: Number(paymentCount),
+          riskScore: Number(riskScore),
+        });
+      } catch (e) {
+        console.error("Failed to fetch stats:", e);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!stats) return <div className="animate-pulse h-24 bg-muted rounded-lg" />;
@@ -37,22 +73,22 @@ export function StatsCards() {
     },
     {
       label: "Treasury Balance",
-      value: `$${(Number(stats.totalBudget) / 1e6).toLocaleString()}`,
-      sub: `${((Number(stats.totalSpent) / Number(stats.totalBudget)) * 100).toFixed(1)}% deployed`,
+      value: `$${(Number(stats.totalBalance) / 1e6).toLocaleString()}`,
+      sub: `${((Number(stats.totalDeposits) / 1e6)).toLocaleString()} deposited`,
       icon: "wallet",
     },
     {
       label: "Transactions",
       value: stats.totalTransactions.toLocaleString(),
-      sub: "Last 24h",
+      sub: "On-chain payments",
       icon: "activity",
     },
     {
-      label: "Risk Alerts",
-      value: stats.unresolvedAlerts.toString(),
-      sub: stats.unresolvedAlerts === 0 ? "All clear" : "Needs attention",
+      label: "Risk Score",
+      value: `${stats.riskScore}/100`,
+      sub: stats.riskScore < 30 ? "Low risk" : stats.riskScore < 70 ? "Medium risk" : "High risk",
       icon: "shield",
-      alert: stats.unresolvedAlerts > 0,
+      alert: stats.riskScore >= 70,
     },
   ];
 
