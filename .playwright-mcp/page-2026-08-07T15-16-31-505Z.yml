@@ -1,0 +1,159 @@
+- generic:
+  - generic:
+    - generic:
+      - complementary:
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=1]: ArcSwarm
+              - paragraph: Treasury OS
+          - navigation:
+            - link:
+              - /url: "#"
+              - text: Dashboard
+            - link:
+              - /url: "#"
+              - text: Treasury
+            - link:
+              - /url: "#"
+              - text: Agents
+            - link:
+              - /url: "#"
+              - text: Risk Monitor
+            - link:
+              - /url: "#"
+              - text: Yield Strategies
+          - generic:
+            - generic:
+              - generic: Network Online
+              - paragraph: "Arc Testnet • Block #55,787,708"
+      - generic:
+        - banner:
+          - generic:
+            - generic:
+              - button
+              - generic:
+                - textbox:
+                  - /placeholder: Search agents, transactions...
+            - generic:
+              - button
+              - button
+              - button: Connect Wallet
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - paragraph: Active Vault
+                - paragraph: 0x86014c...200160
+            - generic: Swarm Active
+          - generic:
+            - generic:
+              - generic:
+                - generic: +2.4%
+                - generic:
+                  - paragraph: Treasury Balance
+                  - generic:
+                    - generic: $0
+                    - generic: USDC
+            - generic:
+              - generic:
+                - generic: +12.8%
+                - generic:
+                  - paragraph: Total Yield Earned
+                  - generic:
+                    - generic: $0
+                    - generic: USDC
+            - generic:
+              - generic:
+                - generic: 0 healthy
+                - generic:
+                  - paragraph: Active Agents
+                  - generic:
+                    - generic: 0/6
+                    - generic: online
+            - generic:
+              - generic:
+                - generic: Low Risk
+                - generic:
+                  - paragraph: Risk Score
+                  - generic:
+                    - generic: "0"
+                    - generic: /100
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=3]: Treasury Overview
+                    - paragraph: Real-time vault metrics
+                  - generic: Updated live
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: +2.4%
+                      - paragraph: Vault Balance
+                      - generic:
+                        - generic: $0.00
+                        - generic: USDC
+                  - generic:
+                    - generic:
+                      - generic: $0.00
+                      - paragraph: Total Deposits
+                      - generic:
+                        - generic: $0.00
+                        - generic: USDC
+                  - generic:
+                    - generic:
+                      - generic: +12.8%
+                      - paragraph: Total Yield
+                      - generic:
+                        - generic: $0.0000
+                        - generic: USDC
+                  - generic:
+                    - generic:
+                      - generic: 100%
+                      - paragraph: Active Agents
+                      - generic:
+                        - generic: 0/0
+                        - generic: online
+              - generic:
+                - paragraph: No agents active
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - heading [level=3]: Risk Monitor
+                      - paragraph: All systems operational
+                  - generic: SAFE
+                - generic:
+                  - generic:
+                    - generic: Risk Score
+                    - generic: 0/100
+                  - generic:
+                    - generic: Low
+                    - generic: Medium
+                    - generic: High
+                - generic:
+                  - generic: Active Alerts
+                  - generic:
+                    - paragraph: No active alerts
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=3]: Live Transactions
+                    - paragraph: 0 recent
+                  - generic: Auto-refresh
+                - generic:
+                  - generic:
+                    - paragraph: No transactions yet
+                    - paragraph: Transactions will appear here
+  - dialog [active] [ref=f4e313]:
+    - generic [ref=f4e348]:
+      - heading "Vault Created!" [level=3] [ref=f4e353]
+      - paragraph [ref=f4e354]: Deposit USDC to start your autonomous treasury
+      - generic [ref=f4e355]:
+        - paragraph [ref=f4e356]: Vault Address
+        - paragraph [ref=f4e357]: "0x86014c6473574F93d4BFc386541681f8c1200160"
+      - button "Activate Swarm" [ref=f4e358] [cursor=pointer]
+    - button "Close" [ref=f4e343] [cursor=pointer]

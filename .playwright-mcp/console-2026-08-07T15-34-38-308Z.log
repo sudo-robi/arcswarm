@@ -1,0 +1,2 @@
+[     172ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:21550
+[   32016ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/trpc/vault.getLiveData?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22vaultAddress%22%3A%220x86014c6473574F93d4BFc386541681f8c1200160%22%7D%7D%7D:0

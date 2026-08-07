@@ -1,0 +1,15 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.26"
+optimizer = true
+optimizer_runs = 200
+evm_version = "cancun"
+verbosity = 2
+
+[rpc_endpoints]
+arc-testnet = "https://rpc.testnet.arc.network"
+
+[etherscan]
+arc-testnet = { key = "arc-testnet", url = "https://explorer.testnet.arc.network" }

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "foundry": {
+      "type": "local",
+      "command": ["bunx", "-y", "foundry-mcp-server"],
+      "enabled": true
+    }
+  },
+  "skills": {
+    "paths": [".opencode/skills"]
+  }
+}

@@ -1,0 +1,52 @@
+# Multi-stage build for ArcSwarm Agents (pnpm monorepo)
+FROM node:20-alpine AS base
+
+# Install pnpm
+RUN corepack enable pnpm
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy workspace files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/agents/package.json ./packages/agents/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile --filter @arcswarm/agents --filter @arcswarm/shared
+
+# Build the application
+FROM base AS builder
+WORKDIR /app
+
+# Copy installed dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/agents/node_modules ./packages/agents/node_modules
+
+# Copy source code
+COPY . .
+
+# Build shared package first
+RUN cd packages/shared && pnpm build
+
+# Build Agents package
+RUN cd packages/agents && pnpm build
+
+# Hardened Distroless Production Runner
+FROM gcr.io/distroless/nodejs20-debian12 AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+
+# Copy built artifacts
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
+COPY --from=builder /app/packages/agents/dist ./packages/agents/dist
+COPY --from=builder /app/packages/agents/package.json ./packages/agents/package.json
+COPY --from=builder /app/packages/agents/node_modules ./packages/agents/node_modules
+COPY --from=builder /app/packages/shared/node_modules ./packages/shared/node_modules
+
+# Distroless nodejs base image has 'node' as the default entrypoint
+CMD ["packages/agents/dist/main.js"]

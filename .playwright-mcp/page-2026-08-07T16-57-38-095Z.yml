@@ -1,0 +1,45 @@
+- generic [ref=f15e3]:
+  - complementary [ref=f15e4]:
+    - generic [ref=f15e5]:
+      - generic [ref=f15e10]:
+        - heading "ArcSwarm" [level=1] [ref=f15e11]
+        - paragraph [ref=f15e12]: Treasury OS
+      - navigation [ref=f15e13]:
+        - button "Dashboard" [ref=f15e14] [cursor=pointer]
+        - button "Treasury" [ref=f15e17] [cursor=pointer]
+        - button "Agents" [ref=f15e21] [cursor=pointer]
+        - button "Risk Monitor" [active] [ref=f15e25] [cursor=pointer]
+        - button "Yield Strategies" [ref=f15e28] [cursor=pointer]
+      - generic [ref=f15e32]:
+        - generic [ref=f15e33]: Network Online
+        - paragraph [ref=f15e36]: "Arc Testnet • Block #55,787,708"
+  - generic [ref=f15e37]:
+    - banner [ref=f15e38]:
+      - generic [ref=f15e39]:
+        - generic [ref=f15e41]:
+          - textbox "Search agents, transactions..." [ref=f15e45]
+          - generic [ref=f15e46]: ⌘K
+        - generic [ref=f15e47]:
+          - button [ref=f15e48] [cursor=pointer]
+          - button [ref=f15e53] [cursor=pointer]
+          - button "Connect Wallet" [ref=f15e58] [cursor=pointer]
+    - main [ref=f15e62]:
+      - generic [ref=f15e434]:
+        - heading "Risk Monitor" [level=2] [ref=f15e435]
+        - generic [ref=f15e436]:
+          - generic [ref=f15e437]:
+            - generic [ref=f15e443]:
+              - heading "Risk Monitor" [level=3] [ref=f15e444]
+              - paragraph [ref=f15e445]: All systems operational
+            - generic [ref=f15e446]: SAFE
+          - generic [ref=f15e447]:
+            - generic [ref=f15e448]:
+              - generic [ref=f15e449]: Risk Score
+              - generic [ref=f15e450]: 0/100
+            - generic [ref=f15e452]:
+              - generic [ref=f15e453]: Low
+              - generic [ref=f15e454]: Medium
+              - generic [ref=f15e455]: High
+          - generic [ref=f15e456]:
+            - generic [ref=f15e457]: Active Alerts
+            - paragraph [ref=f15e466]: No active alerts

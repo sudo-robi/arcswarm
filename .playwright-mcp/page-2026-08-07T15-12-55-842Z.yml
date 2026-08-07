@@ -1,0 +1,45 @@
+- generic [ref=f3e3]:
+  - complementary [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - generic [ref=f3e10]:
+        - heading "ArcSwarm" [level=1] [ref=f3e11]
+        - paragraph [ref=f3e12]: Treasury OS
+      - navigation [ref=f3e13]:
+        - link "Dashboard" [ref=f3e14] [cursor=pointer]:
+          - /url: "#"
+        - link "Treasury" [ref=f3e17] [cursor=pointer]:
+          - /url: "#"
+        - link "Agents" [ref=f3e21] [cursor=pointer]:
+          - /url: "#"
+        - link "Risk Monitor" [ref=f3e25] [cursor=pointer]:
+          - /url: "#"
+        - link "Yield Strategies" [ref=f3e28] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f3e32]:
+        - generic [ref=f3e33]: Network Online
+        - paragraph [ref=f3e36]: "Arc Testnet • Block #55,787,708"
+  - generic [ref=f3e37]:
+    - banner [ref=f3e38]:
+      - generic [ref=f3e39]:
+        - generic [ref=f3e40]:
+          - button [ref=f3e41] [cursor=pointer]
+          - textbox "Search agents, transactions..." [ref=f3e47]
+        - generic [ref=f3e48]:
+          - button [ref=f3e49] [cursor=pointer]
+          - button [ref=f3e54] [cursor=pointer]
+          - button "Connect Wallet" [ref=f3e59] [cursor=pointer]
+    - main [ref=f3e63]:
+      - generic [ref=f3e280]:
+        - heading "Initialize Your Treasury" [level=2] [ref=f3e288]
+        - paragraph [ref=f3e289]: Deploy autonomous AI agents to manage your USDC treasury on Arc. Earn yield, manage risk, and execute payments automatically.
+        - button "Create Treasury Vault" [ref=f3e290] [cursor=pointer]
+        - generic [ref=f3e293]:
+          - generic [ref=f3e294]:
+            - heading "Nanopayments" [level=3] [ref=f3e298]
+            - paragraph [ref=f3e299]: Agent-to-agent micro-transactions via x402 protocol
+          - generic [ref=f3e300]:
+            - heading "Risk Oracle" [level=3] [ref=f3e304]
+            - paragraph [ref=f3e305]: ERC-8183 automated circuit breakers
+          - generic [ref=f3e306]:
+            - heading "Cross-Chain" [level=3] [ref=f3e310]
+            - paragraph [ref=f3e311]: Circle App Kits for unified balances

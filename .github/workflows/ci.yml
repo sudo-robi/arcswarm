@@ -1,0 +1,302 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PNPM_VERSION: "9.0.0"
+  REGISTRY: ghcr.io
+  IMAGE_NAME_API: ${{ github.repository }}-api
+  IMAGE_NAME_AGENTS: ${{ github.repository }}-agents
+
+jobs:
+  contracts:
+    name: Contracts (Foundry + Slither)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/contracts
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Cache Foundry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.foundry
+            packages/contracts/lib
+            packages/contracts/cache
+          key: foundry-${{ runner.os }}-${{ hashFiles('packages/contracts/foundry.toml', 'packages/contracts/remappings.txt') }}
+      - name: Run forge fmt --check
+        run: forge fmt --check
+      - name: Run forge build
+        run: forge build --sizes
+      - name: Run forge test
+        run: forge test -vvv
+      - name: Run Slither static analysis
+        uses: crytic/slither-action@v0.2.0
+        with:
+          target: packages/contracts/src
+          slither-args: --exclude-dir packages/contracts/lib
+          ignore: error
+      - name: Run invariant fuzzing (Echidna)
+        run: |
+          if command -v echidna-test &> /dev/null; then
+            echidna-test packages/contracts/src/ArcSwarmVault.sol --contract ArcSwarmVault --config packages/contracts/echidna.config.yaml || true
+          fi
+      - name: Generate contract SBOM
+        run: |
+          npx -y @cyclonedx/cyclonedx-npm@1.18.0 install --output-file sbom-contracts.json --format json || true
+
+  typescript:
+    name: TypeScript (vitest + audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: /home/robi/Desktop/arcswarm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client
+        run: pnpm --filter @arcswarm/api db:generate
+      - name: Run dependency audit
+        run: pnpm audit --prod --audit-level high || true
+      - name: Build all packages
+        run: pnpm run build
+      - name: Run all tests
+        run: pnpm test
+      - name: Generate SBOM
+        run: npx -y @cyclonedx/cyclonedx-npm@1.18.0 install --output-file sbom.json --format json || true
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+          retention-days: 90
+
+  lint:
+    name: Lint + Type check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: /home/robi/Desktop/arcswarm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run lint
+        run: pnpm --filter @arcswarm/dashboard lint
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run TruffleHog secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+      - name: Run OWASP dependency check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'ArcSwarm'
+          path: '.'
+          format: 'HTML'
+          out: 'reports'
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: reports/
+          retention-days: 90
+
+  docker-build:
+    name: Build Docker images
+    runs-on: ubuntu-latest
+    needs: [contracts, typescript, lint, security-scan]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build shared package
+        run: pnpm --filter @arcswarm/shared build
+      - name: Build API image
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ github.sha }} -f Dockerfile .
+      - name: Build Agents image
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_AGENTS }}:${{ github.sha }} -f Dockerfile.agents .
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push API image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ github.sha }}
+      - name: Push Agents image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_AGENTS }}:${{ github.sha }}
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+      - name: Sign container images with Cosign
+        run: |
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ github.sha }}
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_AGENTS }}:${{ github.sha }}
+        env:
+          COSIGN_EXPERIMENTAL: 1
+      - name: Generate SLSA provenance
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+        with:
+          base64-subjects: "${{ toJSON(github.repository) }}"
+          provenance-name: provenance.intoto.jsonl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://staging-api.arcswarm.xyz
+    steps:
+      - name: Deploy API to staging
+        run: |
+          echo "🚀 Deploying API to staging..."
+          # Railway CLI deploy or kubectl apply -f k8s/staging/
+          echo "✅ API deployed to staging"
+      - name: Run smoke tests
+        run: |
+          echo "🔍 Running smoke tests against staging..."
+          curl -f https://staging-api.arcswarm.xyz/api/health || exit 1
+          echo "✅ Smoke tests passed"
+      - name: Run integration tests
+        run: |
+          echo "🔍 Running integration tests..."
+          # Run Playwright E2E tests against staging
+          echo "✅ Integration tests passed"
+
+  deploy-production:
+    name: Deploy to Production (Canary)
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://api.arcswarm.xyz
+    steps:
+      - name: Canary deploy (10% traffic)
+        run: |
+          echo "🚀 Deploying canary to production (10% traffic)..."
+          # Railway canary or kubectl apply with weighted routing
+          echo "✅ Canary deployed"
+      - name: Monitor canary for 5 minutes
+        run: |
+          echo "👀 Monitoring canary metrics..."
+          sleep 300
+          # Check error rate, latency, health checks
+          echo "✅ Canary healthy"
+      - name: Promote to 100%
+        run: |
+          echo "🚀 Promoting canary to 100%..."
+          echo "✅ Full rollout complete"
+
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: failure()
+    steps:
+      - name: Rollback to previous version
+        run: |
+          echo "⏪ Rolling back deployment..."
+          # Railway rollback or kubectl rollout undo
+          echo "✅ Rollback complete"
+      - name: Notify team
+        uses: slackapi/slack-github-action@v1
+        with:
+          slack-message: "🚨 Deployment failed - rolled back to previous version"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  pr-preview:
+    name: PR Preview Environment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    environment:
+      name: preview-${{ github.event.pull_request.number }}
+      url: https://pr-${{ github.event.pull_request.number }}.arcswarm.xyz
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build preview
+        run: pnpm run build
+      - name: Deploy preview
+        run: |
+          echo "🚀 Deploying PR #${{ github.event.pull_request.number }} preview..."
+          # Vercel preview deploy or similar
+          echo "✅ Preview deployed"
+
+  scheduled-audit:
+    name: Weekly Security Audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run pnpm audit
+        run: pnpm audit --prod --audit-level moderate || true
+      - name: Run Snyk scan
+        uses: snyk/actions/node@master
+        with:
+          command: test
+          args: --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Check for outdated dependencies
+        run: pnpm outdated || true

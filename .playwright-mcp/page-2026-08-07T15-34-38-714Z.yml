@@ -1,0 +1,126 @@
+- generic [ref=f9e3]:
+  - complementary [ref=f9e4]:
+    - generic [ref=f9e5]:
+      - generic [ref=f9e10]:
+        - heading "ArcSwarm" [level=1] [ref=f9e11]
+        - paragraph [ref=f9e12]: Treasury OS
+      - navigation [ref=f9e13]:
+        - link "Dashboard" [ref=f9e14] [cursor=pointer]:
+          - /url: "#"
+        - link "Treasury" [ref=f9e17] [cursor=pointer]:
+          - /url: "#"
+        - link "Agents" [ref=f9e21] [cursor=pointer]:
+          - /url: "#"
+        - link "Risk Monitor" [ref=f9e25] [cursor=pointer]:
+          - /url: "#"
+        - link "Yield Strategies" [ref=f9e28] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f9e32]:
+        - generic [ref=f9e33]: Network Online
+        - paragraph [ref=f9e36]: "Arc Testnet • Block #55,787,708"
+  - generic [ref=f9e37]:
+    - banner [ref=f9e38]:
+      - generic [ref=f9e39]:
+        - generic [ref=f9e41]:
+          - textbox "Search agents, transactions..." [ref=f9e45]
+          - generic [ref=f9e46]: ⌘K
+        - generic [ref=f9e47]:
+          - button [ref=f9e48] [cursor=pointer]
+          - button [ref=f9e53] [cursor=pointer]
+          - button "Connect Wallet" [ref=f9e58] [cursor=pointer]
+    - main [ref=f9e62]:
+      - generic [ref=f9e63]:
+        - generic [ref=f9e71]:
+          - paragraph [ref=f9e72]: Active Vault
+          - paragraph [ref=f9e73]: 0x86014c...200160
+        - generic [ref=f9e74]: Swarm Active
+      - generic [ref=f9e78]:
+        - generic [ref=f9e81]:
+          - generic [ref=f9e82]: +2.4%
+          - generic [ref=f9e90]:
+            - paragraph [ref=f9e91]: Treasury Balance
+            - generic [ref=f9e92]:
+              - generic [ref=f9e93]: $0
+              - generic [ref=f9e94]: USDC
+        - generic [ref=f9e97]:
+          - generic [ref=f9e98]: +12.8%
+          - generic [ref=f9e107]:
+            - paragraph [ref=f9e108]: Total Yield Earned
+            - generic [ref=f9e109]:
+              - generic [ref=f9e110]: $0
+              - generic [ref=f9e111]: USDC
+        - generic [ref=f9e114]:
+          - generic [ref=f9e115]: 0 healthy
+          - generic [ref=f9e126]:
+            - paragraph [ref=f9e127]: Active Agents
+            - generic [ref=f9e128]:
+              - generic [ref=f9e129]: 0/6
+              - generic [ref=f9e130]: online
+        - generic [ref=f9e133]:
+          - generic [ref=f9e134]: Low Risk
+          - generic [ref=f9e142]:
+            - paragraph [ref=f9e143]: Risk Score
+            - generic [ref=f9e144]:
+              - generic [ref=f9e145]: "0"
+              - generic [ref=f9e146]: /100
+      - generic [ref=f9e147]:
+        - generic [ref=f9e148]:
+          - generic [ref=f9e149]:
+            - generic [ref=f9e150]:
+              - generic [ref=f9e151]:
+                - heading "Treasury Overview" [level=3] [ref=f9e152]
+                - paragraph [ref=f9e153]: Real-time vault metrics
+              - generic [ref=f9e154]: Updated live
+            - generic [ref=f9e161]:
+              - generic [ref=f9e164]:
+                - generic [ref=f9e165]: +2.4%
+                - paragraph [ref=f9e173]: Vault Balance
+                - generic [ref=f9e174]:
+                  - generic [ref=f9e175]: $0.00
+                  - generic [ref=f9e176]: USDC
+              - generic [ref=f9e179]:
+                - generic [ref=f9e180]: $0.00
+                - paragraph [ref=f9e189]: Total Deposits
+                - generic [ref=f9e190]:
+                  - generic [ref=f9e191]: $0.00
+                  - generic [ref=f9e192]: USDC
+              - generic [ref=f9e195]:
+                - generic [ref=f9e196]: +12.8%
+                - paragraph [ref=f9e204]: Total Yield
+                - generic [ref=f9e205]:
+                  - generic [ref=f9e206]: $0.0000
+                  - generic [ref=f9e207]: USDC
+              - generic [ref=f9e210]:
+                - generic [ref=f9e211]: 100%
+                - paragraph [ref=f9e222]: Active Agents
+                - generic [ref=f9e223]:
+                  - generic [ref=f9e224]: 0/6
+                  - generic [ref=f9e225]: online
+          - paragraph [ref=f9e230]: No agents active
+        - generic [ref=f9e231]:
+          - generic [ref=f9e232]:
+            - generic [ref=f9e233]:
+              - generic [ref=f9e239]:
+                - heading "Risk Monitor" [level=3] [ref=f9e240]
+                - paragraph [ref=f9e241]: All systems operational
+              - generic [ref=f9e242]: SAFE
+            - generic [ref=f9e243]:
+              - generic [ref=f9e244]:
+                - generic [ref=f9e245]: Risk Score
+                - generic [ref=f9e246]: 0/100
+              - generic [ref=f9e248]:
+                - generic [ref=f9e249]: Low
+                - generic [ref=f9e250]: Medium
+                - generic [ref=f9e251]: High
+            - generic [ref=f9e252]:
+              - generic [ref=f9e253]: Active Alerts
+              - paragraph [ref=f9e262]: No active alerts
+          - generic [ref=f9e263]:
+            - generic [ref=f9e264]:
+              - generic [ref=f9e265]:
+                - heading "Live Transactions" [level=3] [ref=f9e266]
+                - paragraph [ref=f9e267]: 0 recent
+              - generic [ref=f9e268]: Auto-refresh
+            - generic [ref=f9e272]:
+              - paragraph [ref=f9e277]: No transactions yet
+              - paragraph [ref=f9e278]: Transactions will appear here

@@ -1,0 +1,65 @@
+- generic:
+  - generic:
+    - generic:
+      - complementary:
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=1]: ArcSwarm
+              - paragraph: Treasury OS
+          - navigation:
+            - link:
+              - /url: "#"
+              - text: Dashboard
+            - link:
+              - /url: "#"
+              - text: Treasury
+            - link:
+              - /url: "#"
+              - text: Agents
+            - link:
+              - /url: "#"
+              - text: Risk Monitor
+            - link:
+              - /url: "#"
+              - text: Yield Strategies
+          - generic:
+            - generic:
+              - generic: Network Online
+              - paragraph: "Arc Testnet • Block #55,787,708"
+      - generic:
+        - banner:
+          - generic:
+            - generic:
+              - button
+              - generic:
+                - textbox:
+                  - /placeholder: Search agents, transactions...
+            - generic:
+              - button
+              - button
+              - button: Connect Wallet
+        - main:
+          - generic:
+            - heading [level=2]: Initialize Your Treasury
+            - paragraph: Deploy autonomous AI agents to manage your USDC treasury on Arc. Earn yield, manage risk, and execute payments automatically.
+            - button: Create Treasury Vault
+            - generic:
+              - generic:
+                - heading [level=3]: Nanopayments
+                - paragraph: Agent-to-agent micro-transactions via x402 protocol
+              - generic:
+                - heading [level=3]: Risk Oracle
+                - paragraph: ERC-8183 automated circuit breakers
+              - generic:
+                - heading [level=3]: Cross-Chain
+                - paragraph: Circle App Kits for unified balances
+  - dialog [active] [ref=f2e313]:
+    - generic [ref=f2e348]:
+      - heading "Vault Created!" [level=3] [ref=f2e353]
+      - paragraph [ref=f2e354]: Deposit USDC to start your autonomous treasury
+      - generic [ref=f2e355]:
+        - paragraph [ref=f2e356]: Vault Address
+        - paragraph [ref=f2e357]: "0x86014c6473574F93d4BFc386541681f8c1200160"
+      - button "Activate Swarm" [ref=f2e358] [cursor=pointer]
+    - button "Close" [ref=f2e343] [cursor=pointer]

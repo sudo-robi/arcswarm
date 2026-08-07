@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vault {
+  id              String        @id @default(cuid())
+  address         String        @unique
+  userId          String
+  riskTolerance   RiskTolerance @default(MODERATE)
+  totalDeposits   BigInt        @default(0)
+  totalYield      BigInt        @default(0)
+  isActive        Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  transactions    Transaction[]
+  agents          Agent[]
+  riskAlerts      RiskAlert[]
+}
+
+enum RiskTolerance {
+  CONSERVATIVE
+  MODERATE
+  AGGRESSIVE
+}
+
+model Agent {
+  id            String     @id @default(cuid())
+  vaultId       String
+  type          AgentType
+  walletAddress String     @unique
+  budget        BigInt     @default(0)
+  spent         BigInt     @default(0)
+  active        Boolean    @default(true)
+  reputation    Int        @default(50)
+  lastActiveAt  DateTime   @default(now())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  vault         Vault      @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+}
+
+enum AgentType {
+  YIELD
+  LIQUIDITY
+  FX
+  PAYMENT
+  RISK
+  COORDINATOR
+}
+
+model Transaction {
+  id          String         @id @default(cuid())
+  vaultId     String
+  agentId     String?
+  fromAddress String
+  toAddress   String
+  amount      BigInt
+  type        TransactionType
+  memo        String?
+  txHash      String?        @unique
+  blockNumber BigInt?
+  createdAt   DateTime       @default(now())
+  vault       Vault          @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  agent       Agent?         @relation(fields: [agentId], references: [id], onDelete: SetNull)
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  NANOPAYMENT
+  PAYMENT
+  ALLOCATION
+  YIELD_HARVEST
+  REBALANCE
+}
+
+model RiskAlert {
+  id          String      @id @default(cuid())
+  vaultId     String
+  severity    Severity
+  type        String
+  message     String
+  agentId     String?
+  resolved    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  resolvedAt  DateTime?
+  vault       Vault       @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model IndexerCursor {
+  id        String   @id @default("main")
+  lastBlock BigInt
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: arcswarm-api
+description: A production-ready Helm chart for the ArcSwarm Multi-Agent Treasury system
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

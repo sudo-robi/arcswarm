@@ -1,0 +1,110 @@
+[    1216ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:21550
+[    1731ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/favicon.ico:0
+[  482045ms] ReferenceError: Label is not defined
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:167:32)
+    at renderWithHooks (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:11548:26)
+    at updateFunctionComponent (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14582:28)
+    at beginWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3674:22)
+    at Object.invokeGuardedCallbackDev (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3699:24)
+    at invokeGuardedCallback (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3733:39)
+    at beginWork$1 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19765:15)
+    at performUnitOfWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19198:20)
+    at workLoopSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19137:13)
+[  482052ms] ReferenceError: Label is not defined
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:167:32)
+    at renderWithHooks (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:11548:26)
+    at updateFunctionComponent (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14582:28)
+    at beginWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3674:22)
+    at Object.invokeGuardedCallbackDev (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3699:24)
+    at invokeGuardedCallback (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3733:39)
+    at beginWork$1 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19765:15)
+    at performUnitOfWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19198:20)
+    at workLoopSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19137:13)
+[  482054ms] [ERROR] The above error occurred in the <VaultForm> component:
+
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:23:29)
+    at div
+    at Dashboard (http://localhost:3002/src/App.tsx?t=1786113132831:475:41)
+    at _ErrorBoundary (http://localhost:3002/node_modules/.vite/deps/@sentry_react.js?v=7fdf3f68:26228:5)
+    at SwarmErrorBoundary (http://localhost:3002/src/components/error-boundary.tsx:87:38)
+    at QueryClientProvider (http://localhost:3002/node_modules/.vite/deps/chunk-SNFTLKOH.js?v=7fdf3f68:3253:3)
+    at TRPCProvider (http://localhost:3002/node_modules/.vite/deps/@trpc_react-query.js?v=7fdf3f68:563:13)
+    at Providers (http://localhost:3002/src/providers.tsx:32:29)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, _ErrorBoundary. @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14031
+[  482057ms] [ERROR] Captured dashboard render error: ReferenceError: Label is not defined
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:167:32)
+    at renderWithHooks (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:11548:26)
+    at updateFunctionComponent (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14582:28)
+    at beginWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:15924:22)
+    at beginWork$1 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19753:22)
+    at performUnitOfWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19198:20)
+    at workLoopSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19137:13)
+    at renderRootSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19116:15)
+    at recoverFromConcurrentError (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:18736:28)
+    at performSyncWorkOnRoot (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:18879:28) 
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:23:29)
+    at div
+    at Dashboard (http://localhost:3002/src/App.tsx?t=1786113132831:475:41)
+    at _ErrorBoundary (http://localhost:3002/node_modules/.vite/deps/@sentry_react.js?v=7fdf3f68:26228:5)
+    at SwarmErrorBoundary (http://localhost:3002/src/components/error-boundary.tsx:87:38)
+    at QueryClientProvider (http://localhost:3002/node_modules/.vite/deps/chunk-SNFTLKOH.js?v=7fdf3f68:3253:3)
+    at TRPCProvider (http://localhost:3002/node_modules/.vite/deps/@trpc_react-query.js?v=7fdf3f68:563:13)
+    at Providers (http://localhost:3002/src/providers.tsx:32:29) @ http://localhost:3002/src/components/error-boundary.tsx:99
+[  483427ms] ReferenceError: Label is not defined
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:167:32)
+    at renderWithHooks (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:11548:26)
+    at mountIndeterminateComponent (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14926:21)
+    at beginWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:15914:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3674:22)
+    at Object.invokeGuardedCallbackDev (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3699:24)
+    at invokeGuardedCallback (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3733:39)
+    at beginWork$1 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19765:15)
+    at performUnitOfWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19198:20)
+    at workLoopSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19137:13)
+[  483436ms] ReferenceError: Label is not defined
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:167:32)
+    at renderWithHooks (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:11548:26)
+    at mountIndeterminateComponent (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14926:21)
+    at beginWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:15914:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3674:22)
+    at Object.invokeGuardedCallbackDev (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3699:24)
+    at invokeGuardedCallback (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:3733:39)
+    at beginWork$1 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19765:15)
+    at performUnitOfWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19198:20)
+    at workLoopSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19137:13)
+[  483436ms] [ERROR] The above error occurred in the <VaultForm> component:
+
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:23:29)
+    at div
+    at Dashboard (http://localhost:3002/src/App.tsx?t=1786113132831:475:41)
+    at _ErrorBoundary (http://localhost:3002/node_modules/.vite/deps/@sentry_react.js?v=7fdf3f68:26228:5)
+    at SwarmErrorBoundary (http://localhost:3002/src/components/error-boundary.tsx:87:38)
+    at QueryClientProvider (http://localhost:3002/node_modules/.vite/deps/chunk-SNFTLKOH.js?v=7fdf3f68:3253:3)
+    at TRPCProvider (http://localhost:3002/node_modules/.vite/deps/@trpc_react-query.js?v=7fdf3f68:563:13)
+    at Providers (http://localhost:3002/src/providers.tsx:32:29)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, _ErrorBoundary. @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14031
+[  483437ms] [ERROR] Captured dashboard render error: ReferenceError: Label is not defined
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:167:32)
+    at renderWithHooks (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:11548:26)
+    at mountIndeterminateComponent (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:14926:21)
+    at beginWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:15914:22)
+    at beginWork$1 (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19753:22)
+    at performUnitOfWork (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19198:20)
+    at workLoopSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19137:13)
+    at renderRootSync (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:19116:15)
+    at recoverFromConcurrentError (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:18736:28)
+    at performSyncWorkOnRoot (http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:18879:28) 
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786113139272:23:29)
+    at div
+    at Dashboard (http://localhost:3002/src/App.tsx?t=1786113132831:475:41)
+    at _ErrorBoundary (http://localhost:3002/node_modules/.vite/deps/@sentry_react.js?v=7fdf3f68:26228:5)
+    at SwarmErrorBoundary (http://localhost:3002/src/components/error-boundary.tsx:87:38)
+    at QueryClientProvider (http://localhost:3002/node_modules/.vite/deps/chunk-SNFTLKOH.js?v=7fdf3f68:3253:3)
+    at TRPCProvider (http://localhost:3002/node_modules/.vite/deps/@trpc_react-query.js?v=7fdf3f68:563:13)
+    at Providers (http://localhost:3002/src/providers.tsx:32:29) @ http://localhost:3002/src/components/error-boundary.tsx:99
+[  670354ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:21550
+[  826923ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:21550

@@ -1,0 +1,30 @@
+[     775ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:21550
+[    1175ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/favicon.ico:0
+[  260135ms] [ERROR] Warning: React does not recognize the `%s` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `%s` instead. If you accidentally passed it from a parent component, remove it from the DOM element.%s showClose showclose 
+    at div
+    at http://localhost:3002/node_modules/.vite/deps/chunk-5TNAF3B2.js?v=7fdf3f68:45:13
+    at DismissableLayer (http://localhost:3002/node_modules/.vite/deps/chunk-DQSS2LW6.js?v=7fdf3f68:399:7)
+    at http://localhost:3002/node_modules/.vite/deps/chunk-YXGGDUXT.js?v=7fdf3f68:58:11
+    at http://localhost:3002/node_modules/.vite/deps/chunk-5TNAF3B2.js?v=7fdf3f68:45:13
+    at FocusScope (http://localhost:3002/node_modules/.vite/deps/chunk-DQSS2LW6.js?v=7fdf3f68:735:7)
+    at DialogContentImpl (http://localhost:3002/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=7fdf3f68:236:13)
+    at DialogContentModal (http://localhost:3002/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=7fdf3f68:157:58)
+    at Presence (http://localhost:3002/node_modules/.vite/deps/chunk-DQSS2LW6.js?v=7fdf3f68:978:11)
+    at DialogContent (http://localhost:3002/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=7fdf3f68:148:64)
+    at http://localhost:3002/node_modules/.vite/deps/chunk-YXGGDUXT.js?v=7fdf3f68:58:11
+    at http://localhost:3002/node_modules/.vite/deps/chunk-5TNAF3B2.js?v=7fdf3f68:45:13
+    at Portal (http://localhost:3002/node_modules/.vite/deps/chunk-DQSS2LW6.js?v=7fdf3f68:957:24)
+    at Presence (http://localhost:3002/node_modules/.vite/deps/chunk-DQSS2LW6.js?v=7fdf3f68:978:11)
+    at Provider (http://localhost:3002/node_modules/.vite/deps/chunk-DQSS2LW6.js?v=7fdf3f68:109:15)
+    at DialogPortal (http://localhost:3002/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=7fdf3f68:109:11)
+    at _c3 (http://localhost:3002/src/components/ui/dialog.tsx:49:12)
+    at Provider (http://localhost:3002/node_modules/.vite/deps/chunk-DQSS2LW6.js?v=7fdf3f68:109:15)
+    at Dialog (http://localhost:3002/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=7fdf3f68:45:5)
+    at VaultForm (http://localhost:3002/src/components/vault-form.tsx?t=1786114914412:23:29)
+    at div
+    at Dashboard (http://localhost:3002/src/App.tsx:475:41)
+    at _ErrorBoundary (http://localhost:3002/node_modules/.vite/deps/@sentry_react.js?v=7fdf3f68:26228:5)
+    at SwarmErrorBoundary (http://localhost:3002/src/components/error-boundary.tsx:87:38)
+    at QueryClientProvider (http://localhost:3002/node_modules/.vite/deps/chunk-SNFTLKOH.js?v=7fdf3f68:3253:3)
+    at TRPCProvider (http://localhost:3002/node_modules/.vite/deps/@trpc_react-query.js?v=7fdf3f68:563:13)
+    at Providers (http://localhost:3002/src/providers.tsx:32:29) @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:520

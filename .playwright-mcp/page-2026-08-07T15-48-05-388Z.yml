@@ -1,0 +1,29 @@
+- generic [ref=f11e3]:
+  - complementary [ref=f11e4]:
+    - generic [ref=f11e5]:
+      - generic [ref=f11e10]:
+        - heading "ArcSwarm" [level=1] [ref=f11e11]
+        - paragraph [ref=f11e12]: Treasury OS
+      - navigation [ref=f11e13]:
+        - button "Dashboard" [ref=f11e14] [cursor=pointer]
+        - button "Treasury" [ref=f11e17] [cursor=pointer]
+        - button "Agents" [active] [ref=f11e21] [cursor=pointer]
+        - button "Risk Monitor" [ref=f11e25] [cursor=pointer]
+        - button "Yield Strategies" [ref=f11e28] [cursor=pointer]
+      - generic [ref=f11e32]:
+        - generic [ref=f11e33]: Network Online
+        - paragraph [ref=f11e36]: "Arc Testnet • Block #55,787,708"
+  - generic [ref=f11e37]:
+    - banner [ref=f11e38]:
+      - generic [ref=f11e39]:
+        - generic [ref=f11e41]:
+          - textbox "Search agents, transactions..." [ref=f11e45]
+          - generic [ref=f11e46]: ⌘K
+        - generic [ref=f11e47]:
+          - button [ref=f11e48] [cursor=pointer]
+          - button [ref=f11e53] [cursor=pointer]
+          - button "Connect Wallet" [ref=f11e58] [cursor=pointer]
+    - main [ref=f11e62]:
+      - generic [ref=f11e427]:
+        - heading "Agents" [level=2] [ref=f11e428]
+        - paragraph [ref=f11e433]: No agents active

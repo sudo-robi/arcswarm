@@ -1,0 +1,86 @@
+- generic [ref=f12e3]:
+  - complementary [ref=f12e4]:
+    - generic [ref=f12e5]:
+      - generic [ref=f12e10]:
+        - heading "ArcSwarm" [level=1] [ref=f12e11]
+        - paragraph [ref=f12e12]: Treasury OS
+      - navigation [ref=f12e13]:
+        - button "Dashboard" [ref=f12e14] [cursor=pointer]
+        - button "Treasury" [active] [ref=f12e17] [cursor=pointer]
+        - button "Agents" [ref=f12e21] [cursor=pointer]
+        - button "Risk Monitor" [ref=f12e25] [cursor=pointer]
+        - button "Yield Strategies" [ref=f12e28] [cursor=pointer]
+      - generic [ref=f12e32]:
+        - generic [ref=f12e33]: Network Online
+        - paragraph [ref=f12e36]: "Arc Testnet • Block #55,787,708"
+  - generic [ref=f12e37]:
+    - banner [ref=f12e38]:
+      - generic [ref=f12e39]:
+        - button [ref=f12e41] [cursor=pointer]
+        - generic [ref=f12e43]:
+          - button [ref=f12e44] [cursor=pointer]
+          - button [ref=f12e49] [cursor=pointer]
+          - button "Connect Wallet" [ref=f12e54] [cursor=pointer]
+    - main [ref=f12e58]:
+      - generic [ref=f12e276]:
+        - heading "Treasury" [level=2] [ref=f12e277]
+        - generic [ref=f12e278]:
+          - generic [ref=f12e281]:
+            - generic [ref=f12e282]: +2.4%
+            - generic [ref=f12e290]:
+              - paragraph [ref=f12e291]: Treasury Balance
+              - generic [ref=f12e292]:
+                - generic [ref=f12e293]: $0
+                - generic [ref=f12e294]: USDC
+          - generic [ref=f12e297]:
+            - generic [ref=f12e298]: +12.8%
+            - generic [ref=f12e307]:
+              - paragraph [ref=f12e308]: Total Yield Earned
+              - generic [ref=f12e309]:
+                - generic [ref=f12e310]: $0
+                - generic [ref=f12e311]: USDC
+          - generic [ref=f12e314]:
+            - generic [ref=f12e315]: 0 healthy
+            - generic [ref=f12e326]:
+              - paragraph [ref=f12e327]: Active Agents
+              - generic [ref=f12e328]:
+                - generic [ref=f12e329]: 0/6
+                - generic [ref=f12e330]: online
+          - generic [ref=f12e333]:
+            - generic [ref=f12e334]: Low Risk
+            - generic [ref=f12e342]:
+              - paragraph [ref=f12e343]: Risk Score
+              - generic [ref=f12e344]:
+                - generic [ref=f12e345]: "0"
+                - generic [ref=f12e346]: /100
+        - generic [ref=f12e347]:
+          - generic [ref=f12e348]:
+            - generic [ref=f12e349]:
+              - heading "Treasury Overview" [level=3] [ref=f12e350]
+              - paragraph [ref=f12e351]: Real-time vault metrics
+            - generic [ref=f12e352]: Updated live
+          - generic [ref=f12e359]:
+            - generic [ref=f12e362]:
+              - generic [ref=f12e363]: +2.4%
+              - paragraph [ref=f12e371]: Vault Balance
+              - generic [ref=f12e372]:
+                - generic [ref=f12e373]: $0.00
+                - generic [ref=f12e374]: USDC
+            - generic [ref=f12e377]:
+              - generic [ref=f12e378]: $0.00
+              - paragraph [ref=f12e387]: Total Deposits
+              - generic [ref=f12e388]:
+                - generic [ref=f12e389]: $0.00
+                - generic [ref=f12e390]: USDC
+            - generic [ref=f12e393]:
+              - generic [ref=f12e394]: +12.8%
+              - paragraph [ref=f12e402]: Total Yield
+              - generic [ref=f12e403]:
+                - generic [ref=f12e404]: $0.0000
+                - generic [ref=f12e405]: USDC
+            - generic [ref=f12e408]:
+              - generic [ref=f12e409]: 100%
+              - paragraph [ref=f12e420]: Active Agents
+              - generic [ref=f12e421]:
+                - generic [ref=f12e422]: 0/0
+                - generic [ref=f12e423]: online

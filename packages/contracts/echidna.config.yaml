@@ -1,0 +1,6 @@
+filterBlacklist: true
+estimateGas: true
+testMode: assertion
+assertionTimeout: 120
+coverage: true
+configFile: packages/contracts/echidna.config.yaml

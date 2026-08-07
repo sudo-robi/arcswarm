@@ -35,3 +35,22 @@ src/contracts/out/
 src/contracts/cache/
 src/contracts/broadcast/
 src/contracts/lib/
+
+# Claude
+CLAUDE.md
+
+# Turborepo
+.turbo/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Hardhat
+src/contracts/artifacts/
+src/contracts/typechain-types/
+
+*storybook.log

@@ -1,0 +1,38 @@
+- generic:
+  - generic:
+    - main:
+      - generic:
+        - generic:
+          - generic:
+            - heading [level=1]: ArcSwarm
+            - paragraph: Autonomous Treasury Management on Arc
+        - generic:
+          - button: Connect Wallet
+          - button [expanded]: Create Treasury Vault
+      - generic:
+        - generic:
+          - heading [level=2]: Initialize Your Autonomous Treasury
+          - paragraph: No active vault. Create one to get started.
+        - generic:
+          - generic:
+            - heading [level=3]: Nanopayments
+            - paragraph: Agent-to-agent micro-transactions on Arc.
+          - generic:
+            - heading [level=3]: ERC-8183 Risk Oracle
+            - paragraph: Automated circuit breakers & risk monitoring.
+          - generic:
+            - heading [level=3]: Circle App Kits
+            - paragraph: Unified balances, swaps, and cross-chain routing.
+  - dialog [ref=e119]:
+    - heading "Create New Treasury" [level=2] [ref=e121]
+    - generic [ref=e122]:
+      - generic [ref=e123]:
+        - text: Risk Tolerance
+        - combobox "Risk Tolerance" [active] [ref=e124]:
+          - generic:
+            - generic:
+              - generic:
+                - generic: Moderate
+                - generic: Balanced risk/reward (5-8% APY)
+      - button "Create Vault" [ref=e127]
+    - button "Close" [ref=e128]

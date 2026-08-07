@@ -9,9 +9,9 @@ Agents communicate via Nanopayments (x402) on Arc.
 ## Tech Stack
 
 - **Blockchain:** Arc Testnet (EVM-compatible, USDC gas)
-- **Contracts:** Solidity + Hardhat
+- **Contracts:** Solidity + Foundry
 - **Backend:** Node.js + TypeScript + tRPC
-- **Frontend:** Next.js + Tailwind + shadcn/ui
+- **Frontend:** Vite + React + Tailwind + shadcn/ui
 - **Agent Framework:** TypeScript + Circle Agent Stack
 - **Database:** PostgreSQL + Redis
 
@@ -19,9 +19,9 @@ Agents communicate via Nanopayments (x402) on Arc.
 
 ```bash
 # Contracts
-npx hardhat compile
-npx hardhat test
-npx hardhat run scripts/deploy.ts --network arc-testnet
+forge build
+forge test
+forge script script/SetupSwarm.s.sol --rpc-url arc-testnet --broadcast
 
 # Backend
 npm run dev          # Start API server
@@ -29,14 +29,33 @@ npm run db:migrate   # Run migrations
 npm run db:seed      # Seed test data
 
 # Frontend
-npm run dev          # Start Next.js dev server
+npm run dev          # Start Vite dev server
 npm run build        # Production build
 npm run lint         # ESLint
 
 # Agent
 npm run agent:start  # Start agent swarm
 npm run agent:test   # Run agent tests
+
+# Tests (run from repo root)
+pnpm test                       # Full turbo test suite (contracts + api + agents + shared + dashboard)
+pnpm --filter @arcswarm/contracts test   # Forge tests only
+pnpm --filter @arcswarm/api test         # API/tRPC vitest
+pnpm --filter @arcswarm/agents test      # Agent vitest
+pnpm --filter @arcswarm/dashboard test   # Dashboard component tests
+pnpm --filter @arcswarm/shared test      # Shared ABI/config tests
 ```
+
+## Testing
+
+- **Contracts:** Foundry — per-contract suites in `packages/contracts/test/` (ArcSwarmVault.t.sol, AgentBudgetManager.t.sol, AgentRegistry.t.sol, RiskOracle.t.sol, PaymentRouter.t.sol). Run `forge test` from `packages/contracts`.
+- **TS packages:** vitest 2.x — tests live in `<pkg>/test/*.test.ts` (api, agents, shared) or `src/**/*.test.ts(x)` (dashboard, jsdom + testing-library). Each package has `test` / `test:coverage` scripts and a `vitest.config.ts`.
+- **Test-only discipline:** the dedicated `test-engineer` subagent writes tests; production code is never modified by test work. Bugs found while testing are reported, not silently fixed.
+- Use `vm.prank`/`vm.warp`/`vm.assume` in Forge; mock Prisma/ethers in vitest (no live network or DB).
+
+## Test Engineer Agent
+
+A dedicated subagent (`test-engineer`, defined in `.opencode/agent/test-engineer.md`) owns all testing work. Invoke it for writing/extending/auditing tests across any surface. It reports files added, functions covered, test counts, and any product bugs discovered.
 
 ## Arc/Circle Integration Points
 
@@ -52,27 +71,29 @@ npm run agent:test   # Run agent tests
 
 ```
 arcswarm/
-├── contracts/          # Solidity smart contracts
-│   ├── ArcSwarmVault.sol
-│   ├── AgentBudgetManager.sol
-│   ├── AgentRegistry.sol      # ERC-8004
-│   ├── RiskOracle.sol         # ERC-8183
-│   └── PaymentRouter.sol      # x402 Nanopayments
-├── agents/             # Agent implementations
-│   ├── coordinator.ts
-│   ├── yield.ts
-│   ├── liquidity.ts
-│   ├── fx.ts
-│   ├── payment.ts
-│   └── risk.ts
-├── src/                # Backend API
-│   ├── api/
-│   ├── db/
-│   └── services/
-├── app/                # Next.js frontend
-│   ├── dashboard/
-│   ├── vault/
-│   └── components/
+├── packages/           # pnpm workspace packages
+│   ├── contracts/      # Solidity smart contracts (Foundry)
+│   │   ├── src/
+│   │   │   ├── ArcSwarmVault.sol
+│   │   │   ├── AgentBudgetManager.sol
+│   │   │   ├── AgentRegistry.sol      # ERC-8004
+│   │   │   ├── RiskOracle.sol         # ERC-8183
+│   │   │   └── PaymentRouter.sol      # x402 Nanopayments
+│   │   ├── script/     # Deploy scripts
+│   │   └── test/
+│   ├── agents/         # Agent implementations
+│   │   ├── coordinator.ts
+│   │   ├── yield.ts
+│   │   ├── liquidity.ts
+│   │   ├── fx.ts
+│   │   ├── payment.ts
+│   │   └── risk.ts
+│   ├── api/            # Backend API (tRPC)
+│   │   ├── prisma/
+│   │   └── src/
+│   └── shared/         # Shared types + contract ABIs
+├── apps/               # Frontend apps
+│   └── dashboard/      # Vite + React dashboard
 ├── docs/               # Planning docs
 │   ├── CEO-PLANNING.md
 │   └── ARCHITECTURE.md

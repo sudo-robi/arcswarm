@@ -1,0 +1,75 @@
+- generic:
+  - generic:
+    - generic:
+      - complementary:
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=1]: ArcSwarm
+              - paragraph: Treasury OS
+          - navigation:
+            - link:
+              - /url: "#"
+              - text: Dashboard
+            - link:
+              - /url: "#"
+              - text: Treasury
+            - link:
+              - /url: "#"
+              - text: Agents
+            - link:
+              - /url: "#"
+              - text: Risk Monitor
+            - link:
+              - /url: "#"
+              - text: Yield Strategies
+          - generic:
+            - generic:
+              - generic: Network Online
+              - paragraph: "Arc Testnet • Block #55,787,708"
+      - generic:
+        - banner:
+          - generic:
+            - generic:
+              - generic:
+                - textbox:
+                  - /placeholder: Search agents, transactions...
+                - generic: ⌘K
+            - generic:
+              - button
+              - button
+              - button: Connect Wallet
+        - main:
+          - generic:
+            - heading [level=2]: Initialize Your Treasury
+            - paragraph: Deploy autonomous AI agents to manage your USDC treasury on Arc. Earn yield, manage risk, and execute payments automatically.
+            - button: Create Treasury Vault
+            - generic:
+              - generic:
+                - heading [level=3]: Nanopayments
+                - paragraph: Agent-to-agent micro-transactions via x402 protocol
+              - generic:
+                - heading [level=3]: Risk Oracle
+                - paragraph: ERC-8183 automated circuit breakers
+              - generic:
+                - heading [level=3]: Cross-Chain
+                - paragraph: Circle App Kits for unified balances
+  - dialog [active] [ref=f10e312]:
+    - generic [ref=f10e313]:
+      - heading "Create Treasury" [level=2] [ref=f10e315]
+      - paragraph [ref=f10e316]: Deploy AI agents to manage your USDC automatically
+    - generic [ref=f10e317]:
+      - generic [ref=f10e318]:
+        - text: Risk Profile
+        - generic [ref=f10e319]:
+          - button [ref=f10e320] [cursor=pointer]:
+            - paragraph [ref=f10e324]: Conservative
+            - paragraph [ref=f10e325]: Low risk, stable yields (3-5% APY)
+          - button [ref=f10e326] [cursor=pointer]:
+            - paragraph [ref=f10e330]: Moderate
+            - paragraph [ref=f10e331]: Balanced risk/reward (5-8% APY)
+          - button [ref=f10e332] [cursor=pointer]:
+            - paragraph [ref=f10e337]: Aggressive
+            - paragraph [ref=f10e338]: Higher risk, higher potential (8%+ APY)
+      - button "Deploying..." [disabled]
+    - button "Close" [ref=f10e342] [cursor=pointer]

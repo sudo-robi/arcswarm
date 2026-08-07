@@ -1,0 +1,12 @@
+{
+  "name": "@arcswarm/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "forge build",
+    "test": "forge test",
+    "deploy": "forge script script/DeployArcSwarm.s.sol --rpc-url arc-testnet --broadcast",
+    "deploy:setup": "forge script script/DeployArcSwarm.s.sol --rpc-url arc-testnet --broadcast"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,30 @@
+module.exports = {
+  apps: [
+    {
+      name: 'arcswarm-coordinator',
+      cwd: './packages/agents',
+      script: 'dist/main.js',
+      env: {
+        NODE_ENV: 'production',
+        ARC_RPC_URL: process.env.ARC_RPC_URL,
+        PRIVATE_KEY: process.env.PRIVATE_KEY,
+        VAULT_ADDRESS: process.env.VAULT_ADDRESS,
+        BUDGET_MANAGER_ADDRESS: process.env.BUDGET_MANAGER_ADDRESS,
+        AGENT_REGISTRY_ADDRESS: process.env.AGENT_REGISTRY_ADDRESS,
+        RISK_ORACLE_ADDRESS: process.env.RISK_ORACLE_ADDRESS,
+        PAYMENT_ROUTER_ADDRESS: process.env.PAYMENT_ROUTER_ADDRESS,
+        USDC_ADDRESS: process.env.USDC_ADDRESS,
+        CIRCLE_API_KEY: process.env.CIRCLE_API_KEY,
+        CIRCLE_ENTITY_SECRET: process.env.CIRCLE_ENTITY_SECRET,
+      },
+      max_memory_restart: '500M',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      out_file: './logs/coordinator-out.log',
+      error_file: './logs/coordinator-err.log',
+      merge_logs: true,
+    },
+  ],
+}

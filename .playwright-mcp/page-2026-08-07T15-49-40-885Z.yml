@@ -1,0 +1,41 @@
+- generic [ref=f11e3]:
+  - complementary [ref=f11e4]:
+    - generic [ref=f11e5]:
+      - generic [ref=f11e10]:
+        - heading "ArcSwarm" [level=1] [ref=f11e11]
+        - paragraph [ref=f11e12]: Treasury OS
+      - navigation [ref=f11e13]:
+        - button "Dashboard" [ref=f11e14] [cursor=pointer]
+        - button "Treasury" [ref=f11e17] [cursor=pointer]
+        - button "Agents" [ref=f11e21] [cursor=pointer]
+        - button "Risk Monitor" [ref=f11e25] [cursor=pointer]
+        - button "Yield Strategies" [active] [ref=f11e28] [cursor=pointer]
+      - generic [ref=f11e32]:
+        - generic [ref=f11e33]: Network Online
+        - paragraph [ref=f11e36]: "Arc Testnet • Block #55,787,708"
+  - generic [ref=f11e37]:
+    - banner [ref=f11e38]:
+      - generic [ref=f11e39]:
+        - generic [ref=f11e41]:
+          - textbox "Search agents, transactions..." [ref=f11e45]
+          - generic [ref=f11e46]: ⌘K
+        - generic [ref=f11e47]:
+          - button [ref=f11e48] [cursor=pointer]
+          - button [ref=f11e53] [cursor=pointer]
+          - button "Connect Wallet" [ref=f11e58] [cursor=pointer]
+    - main [ref=f11e62]:
+      - generic [ref=f11e474]:
+        - heading "Yield Strategies" [level=2] [ref=f11e475]
+        - generic [ref=f11e476]:
+          - generic [ref=f11e477]:
+            - heading "Conservative" [level=3] [ref=f11e482]
+            - paragraph [ref=f11e483]: 3-5% APY
+            - paragraph [ref=f11e484]: "Risk: Low"
+          - generic [ref=f11e485]:
+            - heading "Balanced" [level=3] [ref=f11e490]
+            - paragraph [ref=f11e491]: 5-8% APY
+            - paragraph [ref=f11e492]: "Risk: Medium"
+          - generic [ref=f11e493]:
+            - heading "Aggressive" [level=3] [ref=f11e498]
+            - paragraph [ref=f11e499]: 8%+ APY
+            - paragraph [ref=f11e500]: "Risk: High"

@@ -1,0 +1,21 @@
+[     227ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:21550
+[   99577ms] [ERROR] WebSocket connection to 'ws://localhost:3001/' failed:  @ http://localhost:3002/node_modules/.vite/deps/chunk-SGQSDMM4.js?v=7fdf3f68:2855
+[   99577ms] [ERROR] WebSocket connection to 'ws://localhost:3001/' failed:  @ http://localhost:3002/node_modules/.vite/deps/chunk-SGQSDMM4.js?v=7fdf3f68:2855
+[   99577ms] [ERROR] WebSocket connection to 'ws://localhost:3002/?token=5r5JJ17uWCQ_' failed:  @ http://localhost:3002/@vite/client:535
+[   99579ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3002/@vite/client:559
+[  100584ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  101585ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  102587ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  103588ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  104590ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  105592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  106594ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  108910ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-WRMRP4E2.js?v=7fdf3f68:21550
+[  219588ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3002/@vite/client:559
+[  219590ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  220592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  221594ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  222596ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  223599ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  224602ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
+[  225604ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/:0
