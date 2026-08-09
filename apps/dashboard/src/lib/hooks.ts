@@ -30,7 +30,7 @@ export function useVaultData(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 1000)
+    const timer = setTimeout(refresh, 3000)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])
@@ -58,7 +58,7 @@ export function useAgentInfos(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 5000)
+    const timer = setTimeout(refresh, 10000)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])
@@ -86,7 +86,7 @@ export function useRiskMetrics(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 10000)
+    const timer = setTimeout(refresh, 20000)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])
@@ -114,7 +114,7 @@ export function usePaymentStats(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 15000)
+    const timer = setTimeout(refresh, 30000)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])

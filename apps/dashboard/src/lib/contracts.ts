@@ -126,21 +126,26 @@ export async function fetchVaultData(): Promise<VaultData> {
   const vault = getVaultContract()
   const usdc = new ethers.Contract(USDC_ADDRESS, ['function balanceOf(address) view returns (uint256)'], provider)
   
-  // Get vault balance via USDC balanceOf (vault.getVaultBalance() may revert)
-  const balance = await usdc.balanceOf(VAULT_ADDRESS)
-  
+  let balance = 0n
+  try {
+    balance = await usdc.balanceOf(VAULT_ADDRESS)
+  } catch { /* ignore */ }
+
   let totalDeposits = 0n
+  try {
+    totalDeposits = await vault.totalDeposits()
+  } catch { /* ignore */ }
+
   let totalYield = 0n
+  try {
+    totalYield = await vault.totalYield()
+  } catch { /* ignore */ }
+
   let depositorCount = 0
   try {
-    ;[totalDeposits, totalYield, depositorCount] = await Promise.all([
-      vault.totalDeposits(),
-      vault.totalYield(),
-      vault.getDepositorCount(),
-    ])
-  } catch {
-    // Vault view functions may revert, use defaults
-  }
+    depositorCount = await vault.getDepositorCount()
+  } catch { /* ignore */ }
+
   return {
     balance: ethers.formatUnits(balance, 6),
     totalDeposits: ethers.formatUnits(totalDeposits, 6),
@@ -196,42 +201,45 @@ export async function fetchAgentInfos(): Promise<AgentInfo[]> {
 
 export async function fetchRiskMetrics(): Promise<RiskMetrics> {
   const oracle = getRiskOracleContract()
+
+  // Try getMetrics first (most complete data, single call)
   try {
-    const [healthResult, paused, metrics] = await Promise.all([
-      oracle.checkHealth(),
-      oracle.isPaused(),
-      oracle.getMetrics(),
-    ])
+    const metrics = await oracle.getMetrics()
+    let paused = false
+    try { paused = await oracle.isPaused() } catch { /* ignore */ }
     return {
-      healthy: healthResult.healthy,
-      riskScore: healthResult.riskScore.toString(),
+      healthy: !metrics.circuitBreakerActive,
+      riskScore: metrics.riskScore.toString(),
       totalExposure: ethers.formatUnits(metrics.totalExposure, 6),
       currentDrawdown: ethers.formatUnits(metrics.currentDrawdown, 6),
       paused,
     }
+  } catch { /* continue to fallback */ }
+
+  // Fallback: try checkHealth
+  try {
+    const [healthy, riskScore] = await oracle.checkHealth()
+    return { healthy, riskScore: riskScore.toString(), totalExposure: '0', currentDrawdown: '0', paused: false }
+  } catch { /* continue to fallback */ }
+
+  // Last fallback: getRiskScore only
+  try {
+    const score = await oracle.getRiskScore()
+    return { healthy: true, riskScore: score.toString(), totalExposure: '0', currentDrawdown: '0', paused: false }
   } catch {
-    // Fallback: try getRiskScore only
-    try {
-      const score = await oracle.getRiskScore()
-      return { healthy: true, riskScore: score.toString(), totalExposure: '0', currentDrawdown: '0', paused: false }
-    } catch {
-      return { healthy: true, riskScore: '0', totalExposure: '0', currentDrawdown: '0', paused: false }
-    }
+    return { healthy: true, riskScore: '0', totalExposure: '0', currentDrawdown: '0', paused: false }
   }
 }
 
 export async function fetchPaymentStats(): Promise<PaymentStats> {
   const router = getPaymentRouterContract()
+  let paymentCount = 0
+  let nanopaymentCount = 0
   try {
-    const [paymentCount, nanopaymentCount] = await Promise.all([
-      router.getPaymentCount(),
-      router.getNanopaymentCount(),
-    ])
-    return {
-      paymentCount: Number(paymentCount),
-      nanopaymentCount: Number(nanopaymentCount),
-    }
-  } catch {
-    return { paymentCount: 0, nanopaymentCount: 0 }
-  }
+    paymentCount = Number(await router.getPaymentCount())
+  } catch { /* ignore */ }
+  try {
+    nanopaymentCount = Number(await router.getNanopaymentCount())
+  } catch { /* ignore */ }
+  return { paymentCount, nanopaymentCount }
 }
