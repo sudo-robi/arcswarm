@@ -57,9 +57,6 @@ jobs:
   typescript:
     name: TypeScript (vitest + audit)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: /home/robi/Desktop/arcswarm
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
@@ -93,9 +90,6 @@ jobs:
   lint:
     name: Lint + Type check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: /home/robi/Desktop/arcswarm
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
