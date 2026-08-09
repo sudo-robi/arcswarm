@@ -96,7 +96,109 @@ function Sidebar({ isOpen, onClose, activeTab, onTabChange }: {
   )
 }
 
+function NotificationsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const notifications = [
+    { id: 1, title: 'Vault Deposited', desc: '9.00 USDC deposited into ArcSwarmVault', time: '2h ago', type: 'success' as const },
+    { id: 2, title: 'Agent Registered', desc: 'YieldAgent, LiquidityAgent, FXAgent joined the swarm', time: '2h ago', type: 'info' as const },
+    { id: 3, title: 'Payment Sent', desc: '0.50 USDC transferred to YieldAgent', time: '2h ago', type: 'success' as const },
+    { id: 4, title: 'Risk Updated', desc: 'RiskOracle score set to 100 — all clear', time: '2h ago', type: 'info' as const },
+    { id: 5, title: 'Circuit Breaker', desc: 'Circuit breaker armed and monitoring', time: '2h ago', type: 'warning' as const },
+  ]
+
+  if (!open) return null
+
+  return (
+    <div className="absolute top-14 right-4 w-80 max-h-96 overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl z-50">
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <h3 className="font-semibold text-sm">Notifications</h3>
+        <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">Clear all</button>
+      </div>
+      <div className="divide-y divide-border">
+        {notifications.map(n => (
+          <div key={n.id} className="p-4 hover:bg-muted/50 transition-colors">
+            <div className="flex items-start gap-3">
+              <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
+                n.type === 'success' ? 'bg-emerald-500' : n.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
+              }`} />
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{n.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{n.desc}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">{n.time}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null
+
+  return (
+    <div className="absolute top-14 right-4 w-72 rounded-2xl border border-border bg-card shadow-2xl z-50">
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <h3 className="font-semibold text-sm">Settings</h3>
+        <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">Close</button>
+      </div>
+      <div className="p-4 space-y-4">
+        <div>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Network</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Chain</span>
+              <span className="text-sm font-mono">Arc Testnet</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Chain ID</span>
+              <span className="text-sm font-mono">5042002</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Currency</span>
+              <span className="text-sm font-mono">USDC</span>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-border pt-4">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Display</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Theme</span>
+              <span className="text-sm text-muted-foreground">System</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Currency</span>
+              <span className="text-sm text-muted-foreground">USDC</span>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-border pt-4">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Contracts</p>
+          <div className="space-y-1">
+            {[
+              ['Vault', '0x68c104C3...55AB3C'],
+              ['Registry', '0xD168D318...2e0Ab'],
+              ['Budget', '0x61dAF0E0...71F8'],
+              ['Risk', '0x255C0534...18a7'],
+              ['Payments', '0x5CEed60c...e0Ab'],
+            ].map(([label, addr]) => (
+              <div key={label} className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{label}</span>
+                <span className="text-xs font-mono">{addr}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Header({ onMenuClick }: { onMenuClick: () => void }) {
+  const [notifsOpen, setNotifsOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="flex items-center justify-between h-full px-4 sm:px-6">
@@ -119,16 +221,24 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
             </kbd>
           </div>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
+        <div className="flex items-center gap-2 sm:gap-3 relative">
+          <button 
+            onClick={() => { setNotifsOpen(!notifsOpen); setSettingsOpen(false) }}
+            className="relative p-2 rounded-lg hover:bg-muted transition-colors"
+          >
             <Bell className="w-5 h-5 text-muted-foreground" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
           </button>
-          <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+          <button 
+            onClick={() => { setSettingsOpen(!settingsOpen); setNotifsOpen(false) }}
+            className="p-2 rounded-lg hover:bg-muted transition-colors"
+          >
             <Settings className="w-5 h-5 text-muted-foreground" />
           </button>
           <div className="w-px h-8 bg-border mx-1 sm:mx-2 hidden sm:block" />
           <WalletConnect />
+          <NotificationsPanel open={notifsOpen} onClose={() => setNotifsOpen(false)} />
+          <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
         </div>
       </div>
     </header>
