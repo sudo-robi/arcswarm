@@ -41,7 +41,7 @@ export function RiskPanel() {
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-semibold text-lg">Risk Monitor</h3>
         <a
-          href={`https://testnet.arc.network/address/${RISK_ORACLE_ADDRESS}`}
+          href={`https://testnet.arcscan.app/address/${RISK_ORACLE_ADDRESS}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"

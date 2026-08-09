@@ -50,7 +50,7 @@ export function AgentGrid() {
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Address</span>
                     <a
-                      href={`https://testnet.arc.network/address/${agent.address}`}
+                      href={`https://testnet.arcscan.app/address/${agent.address}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-mono hover:text-primary transition-colors flex items-center gap-1"

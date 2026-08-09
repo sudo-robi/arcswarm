@@ -10,7 +10,7 @@ const ARC_TESTNET = {
   rpcUrl: 'https://rpc.testnet.arc.network',
   chainName: 'Arc Testnet',
   nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-  blockExplorerUrls: ['https://testnet.arc.network'],
+  blockExplorerUrls: ['https://testnet.arcscan.app'],
 }
 
 export function WalletConnect() {
@@ -142,7 +142,7 @@ export function WalletConnect() {
           )}
         </div>
         <a
-          href={`https://testnet.arc.network/address/${address}`}
+          href={`https://testnet.arcscan.app/address/${address}`}
           target="_blank"
           rel="noopener noreferrer"
           className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"

@@ -45,7 +45,7 @@ export function TreasuryOverview() {
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-semibold text-lg">Treasury Overview</h3>
         <a
-          href={`https://testnet.arc.network/address/${VAULT_ADDRESS}`}
+          href={`https://testnet.arcscan.app/address/${VAULT_ADDRESS}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
@@ -78,7 +78,7 @@ export function TreasuryOverview() {
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Contract Address</span>
           <a
-            href={`https://testnet.arc.network/address/${VAULT_ADDRESS}`}
+            href={`https://testnet.arcscan.app/address/${VAULT_ADDRESS}`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-xs text-muted-foreground hover:text-primary transition-colors"
