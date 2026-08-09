@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink, wsLink, createWSClient } from '@trpc/client'
 import { useState } from 'react'
 import superjson from 'superjson'
-import type { AppRouter } from '@arcswarm/api'
+import type { AppRouter } from './lib/trpc-types'
 
 export const trpc = createTRPCReact<AppRouter>()
 
