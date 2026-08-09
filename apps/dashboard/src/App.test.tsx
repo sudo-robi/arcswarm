@@ -42,6 +42,6 @@ describe('App', () => {
 
   it('shows vault address on dashboard', () => {
     render(<App />)
-    expect(screen.getAllByText(/0x86014c/).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/0x68c104/).length).toBeGreaterThanOrEqual(1)
   })
 })

@@ -10,7 +10,7 @@ import {
   type PaymentStats,
 } from './contracts'
 
-export function useVaultData(intervalMs = 30000) {
+export function useVaultData(intervalMs = 30000, initialDelayMs = 3000) {
   const [data, setData] = useState<VaultData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,15 +30,15 @@ export function useVaultData(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 3000)
+    const timer = setTimeout(refresh, initialDelayMs)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
-  }, [refresh, intervalMs])
+  }, [refresh, intervalMs, initialDelayMs])
 
   return { data, loading, error, refresh }
 }
 
-export function useAgentInfos(intervalMs = 30000) {
+export function useAgentInfos(intervalMs = 30000, initialDelayMs = 10000) {
   const [data, setData] = useState<AgentInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,15 +58,15 @@ export function useAgentInfos(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 10000)
+    const timer = setTimeout(refresh, initialDelayMs)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
-  }, [refresh, intervalMs])
+  }, [refresh, intervalMs, initialDelayMs])
 
   return { data, loading, error, refresh }
 }
 
-export function useRiskMetrics(intervalMs = 30000) {
+export function useRiskMetrics(intervalMs = 30000, initialDelayMs = 20000) {
   const [data, setData] = useState<RiskMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -86,15 +86,15 @@ export function useRiskMetrics(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 20000)
+    const timer = setTimeout(refresh, initialDelayMs)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
-  }, [refresh, intervalMs])
+  }, [refresh, intervalMs, initialDelayMs])
 
   return { data, loading, error, refresh }
 }
 
-export function usePaymentStats(intervalMs = 30000) {
+export function usePaymentStats(intervalMs = 30000, initialDelayMs = 30000) {
   const [data, setData] = useState<PaymentStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -114,10 +114,10 @@ export function usePaymentStats(intervalMs = 30000) {
 
   useEffect(() => {
     mounted.current = true
-    const timer = setTimeout(refresh, 30000)
+    const timer = setTimeout(refresh, initialDelayMs)
     const id = setInterval(refresh, intervalMs)
     return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
-  }, [refresh, intervalMs])
+  }, [refresh, intervalMs, initialDelayMs])
 
   return { data, loading, error, refresh }
 }
