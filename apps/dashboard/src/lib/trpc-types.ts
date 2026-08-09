@@ -1,10 +1,3 @@
-import { z } from 'zod'
-
-const AgentTypeEnum = z.enum(['YIELD', 'LIQUIDITY', 'FX', 'PAYMENT', 'RISK', 'COORDINATOR'])
-const RiskToleranceEnum = z.enum(['CONSERVATIVE', 'MODERATE', 'AGGRESSIVE'])
-const TxTypeEnum = z.enum(['DEPOSIT', 'WITHDRAWAL', 'NANOPAYMENT', 'PAYMENT', 'ALLOCATION', 'YIELD_HARVEST', 'REBALANCE'])
-const SeverityEnum = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
-
 type Vault = {
   id: string
   address: string
