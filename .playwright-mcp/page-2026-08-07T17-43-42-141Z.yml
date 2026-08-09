@@ -1,0 +1,121 @@
+- generic [ref=f32e3]:
+  - complementary [ref=f32e4]:
+    - generic [ref=f32e5]:
+      - generic [ref=f32e10]:
+        - heading "ArcSwarm" [level=1] [ref=f32e11]
+        - paragraph [ref=f32e12]: Treasury OS
+      - navigation [ref=f32e13]:
+        - button "Dashboard" [ref=f32e14] [cursor=pointer]
+        - button "Treasury" [ref=f32e17] [cursor=pointer]
+        - button "Agents" [ref=f32e21] [cursor=pointer]
+        - button "Risk Monitor" [ref=f32e25] [cursor=pointer]
+        - button "Yield Strategies" [ref=f32e28] [cursor=pointer]
+      - generic [ref=f32e32]:
+        - generic [ref=f32e33]: Network Online
+        - paragraph [ref=f32e36]: Arc Testnet
+  - generic [ref=f32e37]:
+    - banner [ref=f32e38]:
+      - generic [ref=f32e39]:
+        - generic [ref=f32e41]:
+          - textbox "Search agents, transactions..." [ref=f32e45]
+          - generic [ref=f32e46]: ⌘K
+        - generic [ref=f32e47]:
+          - button [ref=f32e48] [cursor=pointer]
+          - button [ref=f32e53] [cursor=pointer]
+          - button "Connect Wallet" [ref=f32e58] [cursor=pointer]
+    - main [ref=f32e62]:
+      - generic [ref=f32e63]:
+        - generic [ref=f32e71]:
+          - paragraph [ref=f32e72]: Active Vault
+          - paragraph [ref=f32e73]: 0x71C765...d8976F
+        - generic [ref=f32e74]: Swarm Active
+      - generic [ref=f32e78]:
+        - generic [ref=f32e81]:
+          - generic [ref=f32e82]: +2.4%
+          - generic [ref=f32e90]:
+            - paragraph [ref=f32e91]: Treasury Balance
+            - generic [ref=f32e92]:
+              - generic [ref=f32e93]: $0
+              - generic [ref=f32e94]: USDC
+        - generic [ref=f32e97]:
+          - generic [ref=f32e98]: +12.8%
+          - generic [ref=f32e107]:
+            - paragraph [ref=f32e108]: Total Yield Earned
+            - generic [ref=f32e109]:
+              - generic [ref=f32e110]: $0
+              - generic [ref=f32e111]: USDC
+        - generic [ref=f32e114]:
+          - generic [ref=f32e115]: 0 healthy
+          - generic [ref=f32e126]:
+            - paragraph [ref=f32e127]: Active Agents
+            - generic [ref=f32e128]:
+              - generic [ref=f32e129]: 0/6
+              - generic [ref=f32e130]: online
+        - generic [ref=f32e133]:
+          - generic [ref=f32e134]: Low Risk
+          - generic [ref=f32e142]:
+            - paragraph [ref=f32e143]: Risk Score
+            - generic [ref=f32e144]:
+              - generic [ref=f32e145]: "0"
+              - generic [ref=f32e146]: /100
+      - generic [ref=f32e147]:
+        - generic [ref=f32e148]:
+          - generic [ref=f32e149]:
+            - generic [ref=f32e150]:
+              - generic [ref=f32e151]:
+                - heading "Treasury Overview" [level=3] [ref=f32e152]
+                - paragraph [ref=f32e153]: Real-time vault metrics
+              - generic [ref=f32e154]: Updated live
+            - generic [ref=f32e161]:
+              - generic [ref=f32e164]:
+                - generic [ref=f32e165]: +2.4%
+                - paragraph [ref=f32e173]: Vault Balance
+                - generic [ref=f32e174]:
+                  - generic [ref=f32e175]: $0.00
+                  - generic [ref=f32e176]: USDC
+              - generic [ref=f32e179]:
+                - generic [ref=f32e180]: $0.00
+                - paragraph [ref=f32e189]: Total Deposits
+                - generic [ref=f32e190]:
+                  - generic [ref=f32e191]: $0.00
+                  - generic [ref=f32e192]: USDC
+              - generic [ref=f32e195]:
+                - generic [ref=f32e196]: +12.8%
+                - paragraph [ref=f32e204]: Total Yield
+                - generic [ref=f32e205]:
+                  - generic [ref=f32e206]: $0.0000
+                  - generic [ref=f32e207]: USDC
+              - generic [ref=f32e210]:
+                - generic [ref=f32e211]: 100%
+                - paragraph [ref=f32e222]: Active Agents
+                - generic [ref=f32e223]:
+                  - generic [ref=f32e224]: 0/6
+                  - generic [ref=f32e225]: online
+          - paragraph [ref=f32e230]: No agents active
+        - generic [ref=f32e231]:
+          - generic [ref=f32e232]:
+            - generic [ref=f32e233]:
+              - generic [ref=f32e239]:
+                - heading "Risk Monitor" [level=3] [ref=f32e240]
+                - paragraph [ref=f32e241]: All systems operational
+              - generic [ref=f32e242]: SAFE
+            - generic [ref=f32e243]:
+              - generic [ref=f32e244]:
+                - generic [ref=f32e245]: Risk Score
+                - generic [ref=f32e246]: 0/100
+              - generic [ref=f32e248]:
+                - generic [ref=f32e249]: Low
+                - generic [ref=f32e250]: Medium
+                - generic [ref=f32e251]: High
+            - generic [ref=f32e252]:
+              - generic [ref=f32e253]: Active Alerts
+              - paragraph [ref=f32e262]: No active alerts
+          - generic [ref=f32e263]:
+            - generic [ref=f32e264]:
+              - generic [ref=f32e265]:
+                - heading "Live Transactions" [level=3] [ref=f32e266]
+                - paragraph [ref=f32e267]: 0 recent
+              - generic [ref=f32e268]: Auto-refresh
+            - generic [ref=f32e272]:
+              - paragraph [ref=f32e277]: No transactions yet
+              - paragraph [ref=f32e278]: Transactions will appear here

@@ -1,105 +1,91 @@
-'use client'
+import { useVaultData } from '@/lib/hooks'
+import { VAULT_ADDRESS } from '@/lib/contracts'
+import { Wallet, TrendingUp, ArrowDownRight, ArrowUpRight, Loader2, ExternalLink } from 'lucide-react'
 
-import { trpc } from '@/lib/trpc'
-import { DollarSign, TrendingUp, RefreshCw, ArrowUpRight, ArrowDownRight, Sparkles } from 'lucide-react'
-
-interface TreasuryOverviewProps {
-  vaultId: string | null
-}
-
-export function TreasuryOverview({ vaultId }: TreasuryOverviewProps) {
-  const { data: vault } = trpc.vault.getLiveData.useQuery(
-    { vaultAddress: '0x86014c6473574F93d4BFc386541681f8c1200160' },
-    { refetchInterval: 10000 }
-  )
-
-  const { data: stats } = trpc.stats.useQuery({ vaultId: vaultId || '' }, { enabled: !!vaultId, refetchInterval: 10000 })
-
-  const balance = vault ? Number(vault.balance) / 1e6 : 0
-  const deposits = vault ? Number(vault.totalDeposits) / 1e6 : 0
-  const yield_ = vault ? Number(vault.totalYield) / 1e6 : 0
-  const agents = stats ? `${stats.activeAgents}/${stats.totalAgents}` : '0/6'
+export function TreasuryOverview() {
+  const vault = useVaultData(5000)
+  const balance = vault.data?.balance ?? '0'
+  const totalDeposits = vault.data?.totalDeposits ?? '0'
+  const totalYield = vault.data?.totalYield ?? '0'
+  const depositorCount = vault.data?.depositorCount ?? 0
 
   const metrics = [
-    { 
-      label: 'Vault Balance', 
-      value: `$${balance.toFixed(2)}`, 
-      sub: 'USDC', 
-      icon: DollarSign, 
-      gradient: 'from-violet-500 to-purple-600',
-      bg: 'bg-violet-500/10',
-      change: '+2.4%',
-      changeUp: true
-    },
-    { 
-      label: 'Total Deposits', 
-      value: `$${deposits.toFixed(2)}`, 
-      sub: 'USDC', 
-      icon: TrendingUp, 
-      gradient: 'from-blue-500 to-cyan-600',
-      bg: 'bg-blue-500/10',
-      change: '$0.00',
-      changeUp: true
-    },
-    { 
-      label: 'Total Yield', 
-      value: `$${yield_.toFixed(4)}`, 
-      sub: 'USDC', 
-      icon: Sparkles, 
-      gradient: 'from-emerald-500 to-teal-600',
+    {
+      label: 'Vault Balance',
+      value: `${Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`,
+      icon: Wallet,
+      color: 'text-emerald-500',
       bg: 'bg-emerald-500/10',
-      change: '+12.8%',
-      changeUp: true
     },
-    { 
-      label: 'Active Agents', 
-      value: agents, 
-      sub: 'online', 
-      icon: RefreshCw, 
-      gradient: 'from-cyan-500 to-blue-600',
-      bg: 'bg-cyan-500/10',
-      change: '100%',
-      changeUp: true
+    {
+      label: 'Total Deposits',
+      value: `${Number(totalDeposits).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`,
+      icon: ArrowDownRight,
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+    },
+    {
+      label: 'Total Yield',
+      value: `${Number(totalYield).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`,
+      icon: TrendingUp,
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+    },
+    {
+      label: 'Depositors',
+      value: depositorCount.toString(),
+      icon: ArrowUpRight,
+      color: 'text-orange-500',
+      bg: 'bg-orange-500/10',
     },
   ]
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <div className="p-6 rounded-2xl border border-border bg-card">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold">Treasury Overview</h3>
-          <p className="text-sm text-muted-foreground">Real-time vault metrics</p>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <RefreshCw className="w-3 h-3" />
-          <span>Updated live</span>
-        </div>
+        <h3 className="font-semibold text-lg">Treasury Overview</h3>
+        <a
+          href={`https://testnet.arc.network/address/${VAULT_ADDRESS}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+        >
+          View on Explorer
+          <ExternalLink className="w-3 h-3" />
+        </a>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((m) => (
-          <div key={m.label} className="relative p-4 rounded-xl bg-muted/30 border border-border hover:bg-muted/50 transition-colors">
-            {/* Gradient accent */}
-            <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${m.gradient} opacity-10 rounded-full blur-xl -mr-5 -mt-5`} />
-            
-            <div className="relative">
-              <div className="flex items-start justify-between mb-3">
-                <div className={`w-10 h-10 rounded-lg ${m.bg} flex items-center justify-center`}>
-                  <m.icon className="w-5 h-5" />
-                </div>
-                <div className={`flex items-center gap-0.5 text-xs font-medium ${m.changeUp ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {m.changeUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                  {m.change}
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mb-1">{m.label}</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold">{m.value}</span>
-                <span className="text-xs text-muted-foreground">{m.sub}</span>
-              </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {metrics.map(m => (
+          <div key={m.label} className="p-4 rounded-xl bg-muted/30 border border-border/50">
+            <div className={`w-8 h-8 rounded-lg ${m.bg} flex items-center justify-center mb-3`}>
+              <m.icon className={`w-4 h-4 ${m.color}`} />
             </div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">{m.label}</p>
+            {vault.loading ? (
+              <div className="flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Loading</span>
+              </div>
+            ) : (
+              <p className="text-lg font-bold font-mono">{m.value}</p>
+            )}
           </div>
         ))}
+      </div>
+
+      <div className="mt-4 p-3 rounded-xl bg-muted/20 border border-border/30">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Contract Address</span>
+          <a
+            href={`https://testnet.arc.network/address/${VAULT_ADDRESS}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            {VAULT_ADDRESS}
+          </a>
+        </div>
       </div>
     </div>
   )

@@ -1,104 +1,80 @@
-'use client'
+import { useAgentInfos } from '@/lib/hooks'
+import { AGENT_TYPES } from '@/lib/contracts'
+import { Bot, Loader2, ExternalLink } from 'lucide-react'
 
-import { trpc } from '@/lib/trpc'
-import { Badge } from '@/components/ui/badge'
-import { Wallet, Activity, Zap, Shield, RotateCcw, Play } from 'lucide-react'
+export function AgentGrid() {
+  const agents = useAgentInfos(10000)
 
-interface AgentGridProps {
-  vaultId: string | null
-}
-
-const agentConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; gradient: string; bg: string }> = {
-  YIELD: { icon: Zap, gradient: 'from-yellow-500 to-amber-600', bg: 'bg-yellow-500/10' },
-  LIQUIDITY: { icon: Activity, gradient: 'from-blue-500 to-cyan-600', bg: 'bg-blue-500/10' },
-  PAYMENT: { icon: Wallet, gradient: 'from-violet-500 to-purple-600', bg: 'bg-violet-500/10' },
-  RISK: { icon: Shield, gradient: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-500/10' },
-  FX: { icon: RotateCcw, gradient: 'from-orange-500 to-amber-600', bg: 'bg-orange-500/10' },
-  COORDINATOR: { icon: Play, gradient: 'from-cyan-500 to-blue-600', bg: 'bg-cyan-500/10' },
-}
-
-export function AgentGrid({ vaultId }: AgentGridProps) {
-  const { data: agents } = trpc.agent.getAll.useQuery({ vaultId: vaultId || '' }, { enabled: !!vaultId, refetchInterval: 10000 })
-
-  if (!agents?.length) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-          <Activity className="w-8 h-8 text-muted-foreground" />
-        </div>
-        <p className="text-muted-foreground">No agents active</p>
-      </div>
-    )
-  }
+  const agentList = agents.data ?? []
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <div className="p-6 rounded-2xl border border-border bg-card">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold">Active Agents</h3>
-          <p className="text-sm text-muted-foreground">{agents.filter(a => a.active).length} of {agents.length} online</p>
-        </div>
-        <Badge variant="secondary" className="gap-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Live
-        </Badge>
+        <h3 className="font-semibold text-lg">Agent Swarm</h3>
+        <span className="text-xs text-muted-foreground">
+          {agentList.filter(a => a.active).length} active / {agentList.length} total
+        </span>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {agents.map((agent) => {
-          const config = agentConfig[agent.type] || agentConfig.COORDINATOR
-          const Icon = config.icon
-          const isActive = agent.active
-          const spent = Number(agent.spent) / 1e6
-          const budget = Number(agent.budget) / 1e6
-          const usagePercent = budget > 0 ? (spent / budget) * 100 : 0
-
-          return (
-            <div
-              key={agent.id}
-              className="relative p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-all group cursor-pointer"
-            >
-              {/* Background gradient */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-5 rounded-xl group-hover:opacity-10 transition-opacity`} />
-              
-              <div className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div className={`w-10 h-10 rounded-lg ${config.bg} flex items-center justify-center`}>
-                    <Icon className="w-5 h-5" />
+      {agents.loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-sm text-muted-foreground">Loading agents from Arc testnet...</span>
+        </div>
+      ) : agentList.length === 0 ? (
+        <div className="text-center py-12">
+          <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+          <p className="text-sm text-muted-foreground">No agents registered on-chain yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Agents will appear here once deployed to Arc</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {agentList.map(agent => {
+            const agentType = AGENT_TYPES[agent.agentType] ?? AGENT_TYPES[5]
+            return (
+              <div key={agent.address} className="p-4 rounded-xl border border-border bg-muted/20 card-hover">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${agentType.color} flex items-center justify-center`}>
+                      <span className="text-lg">{agentType.icon}</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{agent.name || agentType.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{agentType.type}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-muted-foreground/50'}`} />
-                    <span className="text-xs text-muted-foreground">{isActive ? 'Active' : 'Paused'}</span>
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <p className="font-semibold capitalize">{agent.type.toLowerCase()}</p>
-                  <p className="text-xs text-muted-foreground font-mono mt-0.5">{agent.walletAddress.slice(0, 12)}...</p>
+                  <div className={`w-2 h-2 rounded-full ${agent.active ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Budget</span>
-                    <span className="font-medium">${budget.toFixed(1)}M</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Address</span>
+                    <a
+                      href={`https://testnet.arc.network/address/${agent.address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono hover:text-primary transition-colors flex items-center gap-1"
+                    >
+                      {agent.address.slice(0, 6)}...{agent.address.slice(-4)}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Spent</span>
-                    <span className="font-medium">${spent.toFixed(1)}M</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Reputation</span>
+                    <span className="font-mono">{agent.reputationScore.toString()}</span>
                   </div>
-                  {/* Usage bar */}
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full bg-gradient-to-r ${config.gradient} rounded-full transition-all`}
-                      style={{ width: `${Math.min(usagePercent, 100)}%` }}
-                    />
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Status</span>
+                    <span className={`font-medium ${agent.active ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {agent.active ? 'Active' : 'Inactive'}
+                    </span>
                   </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

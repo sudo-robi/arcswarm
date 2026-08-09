@@ -1,94 +1,47 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
-import Dashboard from "./App";
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import App from './App'
+import { useVaultData, useAgentInfos, useRiskMetrics, usePaymentStats } from '@/lib/hooks'
 
-const trpcMock = vi.hoisted(() => {
-  const m = {
-    vaultGetAll: vi.fn(),
-    vaultGetLiveData: vi.fn(),
-    agentGetAll: vi.fn(),
-    riskGetLiveScore: vi.fn(),
-    riskGetAlerts: vi.fn(),
-    transactionGetAll: vi.fn(),
-    stats: vi.fn(),
-  };
-  return {
-    m,
-    trpc: {
-      vault: {
-        getAll: { useQuery: m.vaultGetAll },
-        getLiveData: { useQuery: m.vaultGetLiveData },
-      },
-      agent: { getAll: { useQuery: m.agentGetAll } },
-      risk: {
-        getLiveScore: { useQuery: m.riskGetLiveScore },
-        getAlerts: { useQuery: m.riskGetAlerts },
-      },
-      transaction: { getAll: { useQuery: m.transactionGetAll } },
-      stats: { useQuery: m.stats },
-    },
-  };
-});
+vi.mock('@/lib/hooks')
+vi.mock('@/components/wallet-connect', () => ({
+  WalletConnect: () => <div data-testid="wallet-connect">Connect Wallet</div>,
+}))
 
-vi.mock("@/providers", () => ({ trpc: trpcMock.trpc }));
+const mockUseVaultData = vi.mocked(useVaultData)
+const mockUseAgentInfos = vi.mocked(useAgentInfos)
+const mockUseRiskMetrics = vi.mocked(useRiskMetrics)
+const mockUsePaymentStats = vi.mocked(usePaymentStats)
 
-const activeVault = {
-  id: "v1",
-  address: "0x86014c6473574F93d4BFc386541681f8c1200160",
-  isActive: true,
-};
-
-describe("Dashboard", () => {
+describe('App', () => {
   beforeEach(() => {
-    trpcMock.m.vaultGetAll.mockReset();
-    trpcMock.m.vaultGetLiveData.mockReset();
-    trpcMock.m.agentGetAll.mockReset();
-    trpcMock.m.riskGetLiveScore.mockReset();
-    trpcMock.m.riskGetAlerts.mockReset();
-    trpcMock.m.transactionGetAll.mockReset();
-    trpcMock.m.stats.mockReset();
-  });
+    mockUseVaultData.mockReturnValue({ data: { balance: '125000.50', totalDeposits: '200000', totalYield: '5000.50', depositorCount: 3 }, loading: false, error: null, refresh: vi.fn() })
+    mockUseAgentInfos.mockReturnValue({ data: [{ address: '0xabc', active: true, name: 'Yield Agent', agentType: 0, reputationScore: 100n, registeredAt: 1n, lastActiveAt: 2n, wallet: '0xabc', agentId: '0x01' }], loading: false, error: null, refresh: vi.fn() })
+    mockUseRiskMetrics.mockReturnValue({ data: { healthy: true, riskScore: '25', totalExposure: '100000', currentDrawdown: '2.5', paused: false }, loading: false, error: null, refresh: vi.fn() })
+    mockUsePaymentStats.mockReturnValue({ data: { paymentCount: 42, nanopaymentCount: 156 }, loading: false, error: null, refresh: vi.fn() })
+  })
 
-  it("renders the header and brand", () => {
-    trpcMock.m.vaultGetAll.mockReturnValue({ data: [] });
-    render(<Dashboard />);
-    expect(screen.getByRole("heading", { name: /arcswarm/i, hidden: true })).toBeInTheDocument();
-    expect(screen.getByText(/treasury os/i)).toBeInTheDocument();
-  });
+  it('renders ArcSwarm title', () => {
+    render(<App />)
+    expect(screen.getByText('ArcSwarm')).toBeTruthy()
+  })
 
-  it("shows the empty state and vault form when no active vault exists", () => {
-    trpcMock.m.vaultGetAll.mockReturnValue({ data: [] });
-    render(<Dashboard />);
+  it('renders navigation items', () => {
+    render(<App />)
+    expect(screen.getByText('Dashboard')).toBeTruthy()
+    expect(screen.getByText('Treasury')).toBeTruthy()
+    expect(screen.getAllByText('Agents').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Risk Monitor').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Yield Strategies')).toBeTruthy()
+  })
 
-    expect(screen.getByText(/initialize your treasury/i)).toBeInTheDocument();
-    expect(screen.getByText(/deploy autonomous ai agents/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /create treasury vault/i, hidden: true })
-    ).toBeInTheDocument();
-    expect(screen.queryByText("Treasury Balance")).not.toBeInTheDocument();
-  });
+  it('renders wallet connect button', () => {
+    render(<App />)
+    expect(screen.getByTestId('wallet-connect')).toBeTruthy()
+  })
 
-  it("renders all dashboard sections when an active vault exists", () => {
-    trpcMock.m.vaultGetAll.mockReturnValue({ data: [activeVault] });
-    trpcMock.m.vaultGetLiveData.mockReturnValue({
-      data: { balance: "250000000", totalDeposits: "100000000", totalYield: "125000" },
-    });
-    trpcMock.m.agentGetAll.mockReturnValue({ data: [] });
-    trpcMock.m.riskGetLiveScore.mockReturnValue({ data: { healthy: true, riskScore: "25" } });
-    trpcMock.m.riskGetAlerts.mockReturnValue({ data: [] });
-    trpcMock.m.transactionGetAll.mockReturnValue({ data: { transactions: [], total: 0 } });
-    trpcMock.m.stats.mockReturnValue({
-      data: { totalBudget: "0", totalYield: "0", activeAgents: 0, totalAgents: 6, riskScore: "0" },
-    });
-
-    render(<Dashboard />);
-
-    expect(screen.getByText("Active Vault")).toBeInTheDocument();
-    expect(screen.getByText("Swarm Active")).toBeInTheDocument();
-    expect(screen.getByText("Treasury Balance")).toBeInTheDocument();
-    expect(screen.getByText(/no agents active/i)).toBeInTheDocument();
-    expect(screen.getAllByText("Risk Monitor").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(/live transactions/i)).toBeInTheDocument();
-    expect(screen.queryByText(/no active vault/i)).not.toBeInTheDocument();
-  });
-});
+  it('shows vault address on dashboard', () => {
+    render(<App />)
+    expect(screen.getAllByText(/0x86014c/).length).toBeGreaterThanOrEqual(1)
+  })
+})

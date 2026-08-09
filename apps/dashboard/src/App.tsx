@@ -1,12 +1,11 @@
-import { useState } from 'react'
-import { trpc } from '@/providers'
+import { useState, useEffect } from 'react'
 import { WalletConnect } from '@/components/wallet-connect'
-import { VaultForm } from '@/components/vault-form'
 import { StatsCards } from '@/components/stats-cards'
 import { AgentGrid } from '@/components/agent-grid'
-import { TransactionFeed } from '@/components/transaction-feed'
 import { RiskPanel } from '@/components/risk-panel'
 import { TreasuryOverview } from '@/components/treasury-overview'
+import { useVaultData, useAgentInfos, useRiskMetrics, usePaymentStats } from '@/lib/hooks'
+import { VAULT_ADDRESS } from '@/lib/contracts'
 import { 
   Shield, 
   Zap, 
@@ -21,13 +20,6 @@ import {
   Sparkles,
   TrendingUp
 } from 'lucide-react'
-
-const DEMO_VAULT = {
-  id: 'vault-demo-001',
-  address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-  isActive: true,
-  riskTolerance: 3,
-}
 
 type Tab = 'dashboard' | 'treasury' | 'agents' | 'risk' | 'yield'
 
@@ -55,10 +47,10 @@ function Sidebar({ isOpen, onClose, activeTab, onTabChange }: {
       )}
       
       <aside className={`
-        fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50
+        fixed top-0 left-0 h-screen w-64 bg-card border-r border-border z-50
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto
+        lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen
         shrink-0
       `}>
         <div className="flex flex-col h-full">
@@ -143,52 +135,72 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
   )
 }
 
-function EmptyState({ onCreateVault }: { onCreateVault: () => void }) {
+function YieldStrategies() {
+  const vault = useVaultData(30000)
+  const agents = useAgentInfos(30000)
+  const totalYield = vault.data?.totalYield ?? '0'
+  const balance = vault.data?.balance ?? '0'
+
+  const strategies = [
+    { name: 'USDC Lending', apy: '3-5%', risk: 'Low', color: 'from-blue-500 to-cyan-500', desc: 'Stable yields via Arc-native lending protocols', allocated: balance },
+    { name: 'Liquidity Provision', apy: '5-8%', risk: 'Medium', color: 'from-primary to-violet-500', desc: 'Arc DEX liquidity with automated rebalancing', allocated: '0' },
+    { name: 'Cross-Chain Yield', apy: '4-7%', risk: 'Medium', color: 'from-emerald-500 to-teal-500', desc: 'CCTP-powered yield farming across chains', allocated: '0' },
+    { name: 'Agent-Managed', apy: '6-10%', risk: 'Medium', color: 'from-orange-500 to-amber-500', desc: 'AI-optimized yield strategies via agent swarm', allocated: totalYield },
+    { name: 'Risk-Adjusted', apy: '4-6%', risk: 'Low', color: 'from-pink-500 to-rose-500', desc: 'Dynamic allocation based on RiskOracle signals', allocated: '0' },
+  ]
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] p-4 sm:p-8">
-      <div className="relative mb-8">
-        <div className="absolute inset-0 w-32 h-32 rounded-full border-2 border-primary/20 pulse-ring" />
-        <div className="absolute inset-0 w-32 h-32 rounded-full border-2 border-primary/10 pulse-ring" style={{ animationDelay: '0.5s' }} />
-        <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-cyan-500/20 border border-primary/30 flex items-center justify-center glow">
-          <Bot className="w-16 h-16 text-primary" />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Yield Strategies</h2>
+          <p className="text-muted-foreground text-sm mt-1">On-chain vault data from Arc Testnet</p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-muted-foreground">Total Yield Earned</p>
+          <p className="text-2xl font-bold gradient-text">{totalYield} USDC</p>
         </div>
       </div>
-
-      <h2 className="text-2xl sm:text-3xl font-bold mb-3 gradient-text text-center">Initialize Your Treasury</h2>
-      <p className="text-muted-foreground text-center max-w-md mb-8 text-sm sm:text-base">
-        Deploy autonomous AI agents to manage your USDC treasury on Arc. 
-        Earn yield, manage risk, and execute payments automatically.
-      </p>
-
-      <button
-        onClick={onCreateVault}
-        className="px-6 sm:px-8 py-3 sm:py-4 rounded-xl bg-gradient-to-r from-primary to-cyan-500 text-white font-semibold text-base sm:text-lg glow hover:opacity-90 transition-opacity flex items-center gap-2"
-      >
-        <Zap className="w-5 h-5" />
-        Create Treasury Vault
-      </button>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-12 w-full max-w-5xl">
-        <div className="p-6 rounded-2xl bg-card border border-border card-hover">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <Zap className="w-6 h-6 text-primary" />
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {strategies.map(s => (
+          <div key={s.name} className="p-6 rounded-2xl border border-border bg-card card-hover">
+            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-4`}>
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-semibold text-lg mb-1">{s.name}</h3>
+            <p className="text-2xl font-bold gradient-text mb-2">{s.apy} APY</p>
+            <p className="text-sm text-muted-foreground mb-2">Risk: {s.risk}</p>
+            <p className="text-xs text-muted-foreground mb-3">{s.desc}</p>
+            {s.allocated !== '0' && (
+              <div className="pt-3 border-t border-border">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Allocated</p>
+                <p className="text-sm font-mono font-medium">{s.allocated} USDC</p>
+              </div>
+            )}
           </div>
-          <h3 className="font-semibold mb-2">Nanopayments</h3>
-          <p className="text-sm text-muted-foreground">Agent-to-agent micro-transactions via x402 protocol</p>
-        </div>
-        <div className="p-6 rounded-2xl bg-card border border-border card-hover">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
-            <Shield className="w-6 h-6 text-emerald-500" />
+        ))}
+      </div>
+
+      <div className="p-6 rounded-2xl border border-border bg-card">
+        <h3 className="font-semibold mb-4">On-Chain Vault Status</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Vault Address</p>
+            <p className="font-mono text-sm">{VAULT_ADDRESS.slice(0, 10)}...{VAULT_ADDRESS.slice(-6)}</p>
           </div>
-          <h3 className="font-semibold mb-2">Risk Oracle</h3>
-          <p className="text-sm text-muted-foreground">ERC-8183 automated circuit breakers</p>
-        </div>
-        <div className="p-6 rounded-2xl bg-card border border-border card-hover">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
-            <Activity className="w-6 h-6 text-cyan-500" />
+          <div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total Balance</p>
+            <p className="font-mono text-sm">{vault.data?.balance ?? '...'} USDC</p>
           </div>
-          <h3 className="font-semibold mb-2">Cross-Chain</h3>
-          <p className="text-sm text-muted-foreground">Circle App Kits for unified balances</p>
+          <div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total Yield</p>
+            <p className="font-mono text-sm">{totalYield} USDC</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Active Agents</p>
+            <p className="font-mono text-sm">{agents.data?.filter(a => a.active).length ?? '...'}/{agents.data?.length ?? '...'}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -198,30 +210,16 @@ function EmptyState({ onCreateVault }: { onCreateVault: () => void }) {
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
-  const [showVaultForm, setShowVaultForm] = useState(false)
-  const [localVault, setLocalVault] = useState<{ id: string; address: string; name: string } | null>(() => {
-    try {
-      const stored = localStorage.getItem('arcswarm-vault')
-      return stored ? JSON.parse(stored) : null
-    } catch { return null }
-  })
-  
-  const { data: vaults } = trpc.vault.getAll.useQuery(undefined, {
-    retry: false,
-    refetchOnWindowFocus: false,
-  })
-
-  const activeVault = vaults?.find(v => v.isActive) ?? localVault ?? (vaults === undefined && !localVault ? DEMO_VAULT : undefined)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background grid-pattern">
+    <div className="flex min-h-screen max-w-full overflow-x-clip bg-background grid-pattern">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          {activeTab === 'dashboard' && activeVault && (
+        <main className="flex-1 flex flex-col p-4 sm:p-6 lg:p-8">
+          {activeTab === 'dashboard' && (
             <>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 p-4 rounded-2xl glass border border-border">
                 <div className="flex items-center gap-4">
@@ -232,101 +230,61 @@ export default function Dashboard() {
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-card" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Active Vault</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Live Vault</p>
                     <p className="font-mono text-sm font-medium">
-                      {activeVault.address.slice(0, 8)}...{activeVault.address.slice(-6)}
+                      {VAULT_ADDRESS.slice(0, 10)}...{VAULT_ADDRESS.slice(-6)}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <span className="text-xs font-medium text-emerald-400">Swarm Active</span>
+                    <span className="text-xs font-medium text-emerald-400">Arc Testnet</span>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
               </div>
 
-              <StatsCards vaultId={activeVault.id} />
+              <StatsCards />
 
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
                 <div className="xl:col-span-2 space-y-4 sm:space-y-6">
-                  <TreasuryOverview vaultId={activeVault.id} />
-                  <AgentGrid vaultId={activeVault.id} />
+                  <TreasuryOverview />
+                  <AgentGrid />
                 </div>
                 <div className="space-y-4 sm:space-y-6">
-                  <RiskPanel vaultId={activeVault.id} />
-                  <TransactionFeed vaultId={activeVault.id} />
+                  <RiskPanel />
                 </div>
               </div>
             </>
           )}
 
-          {activeTab === 'dashboard' && !activeVault && (
-            <EmptyState onCreateVault={() => setShowVaultForm(true)} />
-          )}
-
-          {activeTab === 'treasury' && activeVault && (
+          {activeTab === 'treasury' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Treasury</h2>
-              <StatsCards vaultId={activeVault.id} />
-              <TreasuryOverview vaultId={activeVault.id} />
+              <StatsCards />
+              <TreasuryOverview />
             </div>
           )}
 
-          {activeTab === 'agents' && activeVault && (
+          {activeTab === 'agents' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Agents</h2>
-              <AgentGrid vaultId={activeVault.id} />
+              <AgentGrid />
             </div>
           )}
 
-          {activeTab === 'risk' && activeVault && (
+          {activeTab === 'risk' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Risk Monitor</h2>
-              <RiskPanel vaultId={activeVault.id} />
+              <RiskPanel />
             </div>
           )}
 
           {activeTab === 'yield' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Yield Strategies</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                {[
-                  { name: 'Conservative', apy: '3-5%', risk: 'Low', color: 'from-blue-500 to-cyan-500', desc: 'Stable yields via USDC lending' },
-                  { name: 'Balanced', apy: '5-8%', risk: 'Medium', color: 'from-primary to-violet-500', desc: 'Diversified yield strategies' },
-                  { name: 'Aggressive', apy: '8%+', risk: 'High', color: 'from-orange-500 to-red-500', desc: 'Maximum yield, higher exposure' },
-                  { name: 'Liquidity Pool', apy: '4-7%', risk: 'Medium', color: 'from-emerald-500 to-teal-500', desc: 'Arc-native liquidity provision' },
-                  { name: 'Cross-Chain', apy: '5-9%', risk: 'Medium', color: 'from-pink-500 to-rose-500', desc: 'CCTP-powered yield farming' },
-                ].map(s => (
-                  <div key={s.name} className="p-6 rounded-2xl border border-border bg-card card-hover">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-4`}>
-                      <TrendingUp className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="font-semibold text-lg mb-1">{s.name}</h3>
-                    <p className="text-2xl font-bold gradient-text mb-2">{s.apy} APY</p>
-                    <p className="text-sm text-muted-foreground mb-2">Risk: {s.risk}</p>
-                    <p className="text-xs text-muted-foreground">{s.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab !== 'dashboard' && !activeVault && (
-            <EmptyState onCreateVault={() => setShowVaultForm(true)} />
+            <YieldStrategies />
           )}
         </main>
       </div>
-
-      <VaultForm 
-        isActive={showVaultForm}
-        onCreate={(vaultId) => {
-          const vault = { id: vaultId, address: '0x86014c6473574F93d4BFc386541681f8c1200160', name: 'My Treasury' }
-          setLocalVault(vault)
-          localStorage.setItem('arcswarm-vault', JSON.stringify(vault))
-        }}
-        onActivate={() => setShowVaultForm(false)}
-      />
     </div>
   )
 }

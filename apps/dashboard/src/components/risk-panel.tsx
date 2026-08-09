@@ -1,107 +1,120 @@
-'use client'
+import { useRiskMetrics } from '@/lib/hooks'
+import { RISK_ORACLE_ADDRESS } from '@/lib/contracts'
+import { Shield, ShieldCheck, ShieldAlert, AlertTriangle, Loader2, ExternalLink } from 'lucide-react'
 
-import { trpc } from '@/lib/trpc'
-import { Badge } from '@/components/ui/badge'
-import { AlertTriangle, ShieldCheck, Shield, Bell } from 'lucide-react'
+export function RiskPanel() {
+  const risk = useRiskMetrics(10000)
 
-interface RiskPanelProps {
-  vaultId: string | null
-}
+  const riskScore = risk.data?.riskScore ?? '0'
+  const healthy = risk.data?.healthy ?? true
+  const paused = risk.data?.paused ?? false
+  const totalExposure = risk.data?.totalExposure ?? '0'
+  const currentDrawdown = risk.data?.currentDrawdown ?? '0'
 
-export function RiskPanel({ vaultId }: RiskPanelProps) {
-  const { data: risk } = trpc.risk.getLiveScore.useQuery(
-    { riskOracleAddress: '0xF36CB7f4c8D7E267FFfEEa33D0757e1A5a94C3cd' },
-    { refetchInterval: 10000 }
-  )
+  const scoreNum = Number(riskScore)
+  const gaugePercent = Math.min(scoreNum, 100)
 
-  const { data: alerts } = trpc.risk.getAlerts.useQuery(
-    { vaultId: vaultId || '' },
-    { enabled: !!vaultId, refetchInterval: 10000 }
-  )
+  let gaugeColor = 'from-emerald-500 to-teal-500'
+  let statusText = 'Healthy'
+  let statusColor = 'text-emerald-400'
+  let StatusIcon = ShieldCheck
 
-  const healthy = risk?.healthy ?? true
-  const riskScore = risk?.riskScore ?? 0
+  if (paused) {
+    gaugeColor = 'from-red-500 to-rose-500'
+    statusText = 'Circuit Breaker Active'
+    statusColor = 'text-red-400'
+    StatusIcon = ShieldAlert
+  } else if (scoreNum > 70) {
+    gaugeColor = 'from-orange-500 to-red-500'
+    statusText = 'Elevated Risk'
+    statusColor = 'text-orange-400'
+    StatusIcon = AlertTriangle
+  } else if (scoreNum > 40) {
+    gaugeColor = 'from-yellow-500 to-orange-500'
+    statusText = 'Moderate'
+    statusColor = 'text-yellow-400'
+    StatusIcon = Shield
+  }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <div className="p-6 rounded-2xl border border-border bg-card">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${healthy ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}>
-            {healthy ? (
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            ) : (
-              <AlertTriangle className="w-5 h-5 text-rose-400" />
-            )}
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold">Risk Monitor</h3>
-            <p className="text-sm text-muted-foreground">
-              {healthy ? 'All systems operational' : 'Issues detected'}
-            </p>
-          </div>
-        </div>
-        <Badge 
-          variant={healthy ? 'default' : 'destructive'} 
-          className={`${healthy ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}
+        <h3 className="font-semibold text-lg">Risk Monitor</h3>
+        <a
+          href={`https://testnet.arc.network/address/${RISK_ORACLE_ADDRESS}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
         >
-          {healthy ? 'SAFE' : 'WARNING'}
-        </Badge>
+          RiskOracle
+          <ExternalLink className="w-3 h-3" />
+        </a>
       </div>
 
-      {/* Risk gauge */}
-      <div className="mb-6 p-4 rounded-xl bg-muted/50">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">Risk Score</span>
-          <span className="text-lg font-bold">{riskScore}/100</span>
+      {risk.loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-sm text-muted-foreground">Loading risk data...</span>
         </div>
-        <div className="h-2 bg-background rounded-full overflow-hidden">
-          <div 
-            className={`h-full rounded-full transition-all ${
-              riskScore < 30 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' :
-              riskScore < 70 ? 'bg-gradient-to-r from-amber-500 to-orange-500' :
-              'bg-gradient-to-r from-rose-500 to-red-500'
-            }`}
-            style={{ width: `${riskScore}%` }}
-          />
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-xs text-emerald-400">Low</span>
-          <span className="text-xs text-amber-400">Medium</span>
-          <span className="text-xs text-rose-400">High</span>
-        </div>
-      </div>
-
-      {/* Alerts */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Bell className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Active Alerts</span>
-        </div>
-        {alerts?.length ? (
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {alerts.slice(0, 5).map((alert) => (
-              <div key={alert.id} className="p-3 rounded-lg bg-rose-500/5 border border-rose-500/10 border-l-4 border-l-rose-500">
-                <div className="flex items-center justify-between mb-1">
-                  <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                    {alert.severity}
-                  </Badge>
-                  <span className="text-[10px] text-muted-foreground">
-                    {new Date(alert.createdAt).toLocaleTimeString()}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground">{alert.message}</p>
+      ) : (
+        <>
+          <div className="flex items-center justify-center mb-6">
+            <div className="relative w-40 h-40">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted/30" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${gaugePercent * 2.51} 251`}
+                  className={`bg-gradient-to-r ${gaugeColor}`}
+                  style={{ stroke: 'url(#gaugeGradient)' }}
+                />
+                <defs>
+                  <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" className="text-emerald-500" stopColor="currentColor" />
+                    <stop offset="50%" className="text-yellow-500" stopColor="currentColor" />
+                    <stop offset="100%" className="text-red-500" stopColor="currentColor" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-bold">{riskScore}</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Risk Score</span>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
-              <Shield className="w-5 h-5 text-emerald-400" />
             </div>
-            <p className="text-xs text-muted-foreground">No active alerts</p>
           </div>
-        )}
-      </div>
+
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <StatusIcon className={`w-4 h-4 ${statusColor}`} />
+            <span className={`text-sm font-medium ${statusColor}`}>{statusText}</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Total Exposure</p>
+              <p className="font-mono text-sm font-medium">{Number(totalExposure).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC</p>
+            </div>
+            <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Current Drawdown</p>
+              <p className="font-mono text-sm font-medium">{Number(currentDrawdown).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC</p>
+            </div>
+            <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Circuit Breaker</p>
+              <p className={`font-mono text-sm font-medium ${paused ? 'text-red-400' : 'text-emerald-400'}`}>
+                {paused ? 'TRIGGERED' : 'Normal'}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Network</p>
+              <p className="font-mono text-sm font-medium">Arc Testnet</p>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

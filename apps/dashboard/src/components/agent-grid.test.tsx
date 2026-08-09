@@ -1,112 +1,53 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { AgentGrid } from "./agent-grid";
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { AgentGrid } from './agent-grid'
+import { useAgentInfos } from '@/lib/hooks'
 
-const trpcMock = vi.hoisted(() => {
-  const m = {
-    agentGetAll: vi.fn(),
-  };
-  return {
-    m,
-    trpc: {
-      agent: { getAll: { useQuery: m.agentGetAll } },
-    },
-  };
-});
+vi.mock('@/lib/hooks')
 
-vi.mock("@/lib/trpc", () => ({ trpc: trpcMock.trpc }));
+const mockUseAgentInfos = vi.mocked(useAgentInfos)
 
-const agents = [
-  {
-    id: "a1",
-    type: "YIELD",
-    active: true,
-    walletAddress: "0x1234567890abcdef1234567890abcdef12345678",
-    budget: 10000000n,
-    spent: 2000000n,
-  },
-  {
-    id: "a2",
-    type: "PAYMENT",
-    active: false,
-    walletAddress: "0xabcdef1234567890abcdef1234567890abcdef12",
-    budget: 5000000n,
-    spent: 5000000n,
-  },
-];
-
-describe("AgentGrid", () => {
+describe('AgentGrid', () => {
   beforeEach(() => {
-    trpcMock.m.agentGetAll.mockReset();
-  });
+    mockUseAgentInfos.mockReturnValue({
+      data: [
+        { address: '0xabc1234567890def1234', active: true, name: 'Yield Agent', agentType: 0, reputationScore: 100n, registeredAt: 1n, lastActiveAt: 2n, wallet: '0xabc', agentId: '0x01' },
+        { address: '0xdef1234567890abc1234', active: true, name: 'Risk Agent', agentType: 4, reputationScore: 95n, registeredAt: 1n, lastActiveAt: 2n, wallet: '0xdef', agentId: '0x02' },
+        { address: '0x1234567890abcdef1234', active: false, name: 'FX Agent', agentType: 2, reputationScore: 80n, registeredAt: 1n, lastActiveAt: 2n, wallet: '0x123', agentId: '0x03' },
+      ],
+      loading: false,
+      error: null,
+      refresh: vi.fn(),
+    })
+  })
 
-  it("shows an empty state when there are no agents", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: [] });
-    render(<AgentGrid vaultId="v1" />);
-    expect(screen.getByText(/no agents active/i)).toBeInTheDocument();
-  });
+  it('renders agent names', () => {
+    render(<AgentGrid />)
+    expect(screen.getByText('Yield Agent')).toBeTruthy()
+    expect(screen.getByText('Risk Agent')).toBeTruthy()
+    expect(screen.getByText('FX Agent')).toBeTruthy()
+  })
 
-  it("shows an empty state when the query is disabled (no vaultId)", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: undefined });
-    render(<AgentGrid vaultId={null} />);
-    expect(screen.getByText(/no agents active/i)).toBeInTheDocument();
-  });
+  it('shows active/inactive status', () => {
+    render(<AgentGrid />)
+    expect(screen.getAllByText('Active').length).toBe(2)
+    expect(screen.getAllByText('Inactive').length).toBe(1)
+  })
 
-  it("calls the query with enabled=false when no vaultId is provided", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: undefined });
-    render(<AgentGrid vaultId={null} />);
-    expect(trpcMock.m.agentGetAll).toHaveBeenCalledWith(
-      { vaultId: "" },
-      expect.objectContaining({ enabled: false, refetchInterval: 10000 })
-    );
-  });
+  it('shows agent count', () => {
+    render(<AgentGrid />)
+    expect(screen.getByText(/2 active \/ 3 total/)).toBeTruthy()
+  })
 
-  it("calls the query with enabled=true when a vaultId is provided", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: agents });
-    render(<AgentGrid vaultId="v1" />);
-    expect(trpcMock.m.agentGetAll).toHaveBeenCalledWith(
-      { vaultId: "v1" },
-      expect.objectContaining({ enabled: true, refetchInterval: 10000 })
-    );
-  });
+  it('shows empty state when no agents', () => {
+    mockUseAgentInfos.mockReturnValue({ data: [], loading: false, error: null, refresh: vi.fn() })
+    render(<AgentGrid />)
+    expect(screen.getByText(/No agents registered/)).toBeTruthy()
+  })
 
-  it("renders the Active Agents title", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: agents });
-    render(<AgentGrid vaultId="v1" />);
-    expect(screen.getByRole("heading", { name: /active agents/i })).toBeInTheDocument();
-  });
-
-  it("renders agent type labels lowercased", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: agents });
-    render(<AgentGrid vaultId="v1" />);
-    expect(screen.getByText("yield")).toBeInTheDocument();
-    expect(screen.getByText("payment")).toBeInTheDocument();
-  });
-
-  it("renders active and paused badges per agent", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: agents });
-    render(<AgentGrid vaultId="v1" />);
-    expect(screen.getByText("Active")).toBeInTheDocument();
-    expect(screen.getByText("Paused")).toBeInTheDocument();
-  });
-
-  it("formats budget and spent amounts in millions", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: agents });
-    render(<AgentGrid vaultId="v1" />);
-    expect(screen.getByText("$10.0M")).toBeInTheDocument();
-    expect(screen.getByText("$2.0M")).toBeInTheDocument();
-    expect(screen.getAllByText("$5.0M")).toHaveLength(2);
-  });
-
-  it("truncates the wallet address to 10 chars", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: agents });
-    render(<AgentGrid vaultId="v1" />);
-    expect(screen.getByText("0x1234567890...")).toBeInTheDocument();
-  });
-
-  it("renders an icon per agent card", () => {
-    trpcMock.m.agentGetAll.mockReturnValue({ data: agents });
-    const { container } = render(<AgentGrid vaultId="v1" />);
-    expect(container.querySelectorAll("svg")).toHaveLength(agents.length);
-  });
-});
+  it('shows loading state', () => {
+    mockUseAgentInfos.mockReturnValue({ data: [], loading: true, error: null, refresh: vi.fn() })
+    render(<AgentGrid />)
+    expect(screen.getByText(/Loading agents/)).toBeTruthy()
+  })
+})
