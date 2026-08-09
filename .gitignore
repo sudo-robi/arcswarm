@@ -54,3 +54,7 @@ src/contracts/artifacts/
 src/contracts/typechain-types/
 
 *storybook.log
+.playwright-mcp/
+dashboard-seeded*.png
+packages/contracts/broadcast/
+packages/contracts/cache/

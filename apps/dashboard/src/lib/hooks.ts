@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   fetchVaultData,
   fetchAgentInfos,
@@ -10,105 +10,113 @@ import {
   type PaymentStats,
 } from './contracts'
 
-export function useVaultData(intervalMs = 5000) {
+export function useVaultData(intervalMs = 30000) {
   const [data, setData] = useState<VaultData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const mounted = useRef(true)
 
   const refresh = useCallback(async () => {
     try {
       const vault = await fetchVaultData()
-      setData(vault)
+      if (mounted.current) setData(vault)
       setError(null)
     } catch (e: any) {
-      setError(e.message ?? 'Failed to fetch vault data')
+      if (mounted.current) setError(e.message ?? 'Failed to fetch vault data')
     } finally {
-      setLoading(false)
+      if (mounted.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    refresh()
+    mounted.current = true
+    const timer = setTimeout(refresh, 1000)
     const id = setInterval(refresh, intervalMs)
-    return () => clearInterval(id)
+    return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])
 
   return { data, loading, error, refresh }
 }
 
-export function useAgentInfos(intervalMs = 10000) {
+export function useAgentInfos(intervalMs = 30000) {
   const [data, setData] = useState<AgentInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const mounted = useRef(true)
 
   const refresh = useCallback(async () => {
     try {
       const agents = await fetchAgentInfos()
-      setData(agents)
+      if (mounted.current) setData(agents)
       setError(null)
     } catch (e: any) {
-      setError(e.message ?? 'Failed to fetch agents')
+      if (mounted.current) setError(e.message ?? 'Failed to fetch agents')
     } finally {
-      setLoading(false)
+      if (mounted.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    refresh()
+    mounted.current = true
+    const timer = setTimeout(refresh, 5000)
     const id = setInterval(refresh, intervalMs)
-    return () => clearInterval(id)
+    return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])
 
   return { data, loading, error, refresh }
 }
 
-export function useRiskMetrics(intervalMs = 10000) {
+export function useRiskMetrics(intervalMs = 30000) {
   const [data, setData] = useState<RiskMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const mounted = useRef(true)
 
   const refresh = useCallback(async () => {
     try {
       const risk = await fetchRiskMetrics()
-      setData(risk)
+      if (mounted.current) setData(risk)
       setError(null)
     } catch (e: any) {
-      setError(e.message ?? 'Failed to fetch risk metrics')
+      if (mounted.current) setError(e.message ?? 'Failed to fetch risk metrics')
     } finally {
-      setLoading(false)
+      if (mounted.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    refresh()
+    mounted.current = true
+    const timer = setTimeout(refresh, 10000)
     const id = setInterval(refresh, intervalMs)
-    return () => clearInterval(id)
+    return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])
 
   return { data, loading, error, refresh }
 }
 
-export function usePaymentStats(intervalMs = 10000) {
+export function usePaymentStats(intervalMs = 30000) {
   const [data, setData] = useState<PaymentStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const mounted = useRef(true)
 
   const refresh = useCallback(async () => {
     try {
       const stats = await fetchPaymentStats()
-      setData(stats)
+      if (mounted.current) setData(stats)
       setError(null)
     } catch (e: any) {
-      setError(e.message ?? 'Failed to fetch payment stats')
+      if (mounted.current) setError(e.message ?? 'Failed to fetch payment stats')
     } finally {
-      setLoading(false)
+      if (mounted.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    refresh()
+    mounted.current = true
+    const timer = setTimeout(refresh, 15000)
     const id = setInterval(refresh, intervalMs)
-    return () => clearInterval(id)
+    return () => { mounted.current = false; clearTimeout(timer); clearInterval(id) }
   }, [refresh, intervalMs])
 
   return { data, loading, error, refresh }
