@@ -12,4 +12,4 @@ verbosity = 2
 arc-testnet = "https://rpc.testnet.arc.network"
 
 [etherscan]
-arc-testnet = { key = "arc-testnet", url = "https://explorer.testnet.arc.network" }
+arc-testnet = { key = "arc-testnet", url = "https://testnet.arcscan.app" }

@@ -141,7 +141,7 @@ forge script script/DeployArcSwarm.s.sol --rpc-url arc-testnet --broadcast
 3. Create vault → Set risk tolerance → Deposit 10,000 USDC (from testnet faucet)
 4. Click "Activate Swarm"
 5. Watch dashboard: agents start, nanopayments appear in TransactionFeed
-6. Verify on ArcScan: `https://explorer.testnet.arc.network/address/0x11d0b045Df255940de0dF6CfD0130d9D25204214` → **Nanopayments** tab → Should see 50+
+6. Verify on ArcScan: `https://testnet.arcscan.app/address/0x11d0b045Df255940de0dF6CfD0130d9D25204214` → **Nanopayments** tab → Should see 50+
 
 ### 9. Video + Submit
 - Record 3-min demo (OBS/Loom)

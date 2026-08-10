@@ -1,0 +1,27 @@
+Introducing ArcSwarm, an autonomous multi-agent USDC treasury management system built on Arc.
+
+ArcSwarm uses six specialized AI agents that work together to manage your treasury: a Yield Agent, a Liquidity Agent, an FX Agent, a Payment Agent, a Risk Agent, and a Coordinator Agent.
+
+These agents communicate with each other using Nanopayments on the Arc network, enabling autonomous collaboration.
+
+Let's look at the dashboard. On the left, you can see the sidebar with navigation tabs for Treasury, Agents, Risk Monitor, and Yield Strategies.
+
+The Treasury Overview shows our vault balance of nine USDC, total deposits, yield earned, and the number of active depositors.
+
+The Agent Registry displays all six registered agents on the Arc testnet, showing their names, roles, status, reputation scores, and wallet addresses.
+
+The Risk Monitor panel shows the current risk score of one hundred, health status, and total portfolio exposure. The circuit breaker is active.
+
+The Yield Strategies panel displays yield farming strategies, harvest history, and pending rewards.
+
+Each agent has its own isolated wallet with spending policies managed by the AgentBudgetManager contract.
+
+All transactions are recorded on-chain for full transparency. You can view them on the Arc testnet explorer.
+
+ArcSwarm integrates with Circle App Kits for unified balance, swap, and send operations. It uses the Agent Stack for coordinated agent execution.
+
+The system is fully tested with four hundred and sixty-three tests passing across Solidity contracts, API endpoints, agent logic, and the dashboard.
+
+Built with Foundry, Node.js, TypeScript, React, and Tailwind CSS. Deployed on Arc testnet with USDC as the native gas token.
+
+ArcSwarm - autonomous treasury management powered by AI agents on Arc.
