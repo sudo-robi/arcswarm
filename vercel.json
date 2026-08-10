@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "apps/dashboard/dist",
+  "framework": null,
+  "installCommand": "pnpm install"
+}
