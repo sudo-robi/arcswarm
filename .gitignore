@@ -58,3 +58,4 @@ src/contracts/typechain-types/
 dashboard-seeded*.png
 packages/contracts/broadcast/
 packages/contracts/cache/
+.vercel

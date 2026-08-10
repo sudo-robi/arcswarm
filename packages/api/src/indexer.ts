@@ -1,4 +1,4 @@
-import { PrismaClient, AgentType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { ethers } from "ethers";
 import {
   CONTRACTS,
@@ -206,7 +206,7 @@ async function indexAgentRegistryEvents(fromBlock: bigint, toBlock: bigint) {
       where: { walletAddress: e.args.wallet.toLowerCase() },
       create: {
         vaultId: (await getVaultId())!,
-        type: ["YIELD", "LIQUIDITY", "FX", "PAYMENT", "RISK", "COORDINATOR"][Number(e.args.agentType)] as AgentType,
+        type: ["YIELD", "LIQUIDITY", "FX", "PAYMENT", "RISK", "COORDINATOR"][Number(e.args.agentType)] as "YIELD" | "LIQUIDITY" | "FX" | "PAYMENT" | "RISK" | "COORDINATOR",
         walletAddress: e.args.wallet.toLowerCase(),
         budget: 0n,
         spent: 0n,
