@@ -24,7 +24,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
         </div>
 
         {error.message && (
-          <div className="p-3 text-left rounded-lg bg-slate-950/80 border border-slate-800/80 font-mono text-xs text-red-400 overflow-x-auto max-h-32">
+          <div role="alert" className="p-3 text-left rounded-lg bg-slate-950/80 border border-slate-800/80 font-mono text-xs text-red-400 overflow-x-auto max-h-32">
             {error.message}
           </div>
         )}

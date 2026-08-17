@@ -69,7 +69,7 @@ describe("WalletConnect", () => {
     await user.click(screen.getByRole("button", { name: /connect wallet/i }));
     await waitFor(() => expect(screen.getByText(/aaaa\.\.\.aaaa/)).toBeInTheDocument(), { timeout: 5000 });
 
-    const disconnectBtn = screen.getByRole("button", { name: "" });
+    const disconnectBtn = screen.getByRole("button", { name: /disconnect wallet/i });
     await user.click(disconnectBtn);
 
     await waitFor(() => {

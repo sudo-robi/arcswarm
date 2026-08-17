@@ -11,7 +11,9 @@ const ARC_TESTNET = {
   chainName: 'Arc Testnet',
   nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
   blockExplorerUrls: ['https://testnet.arcscan.app'],
-}
+} as const
+
+const METAMASK_CHAIN_NOT_ADDED_ERROR_CODE = 4902
 
 export function WalletConnect() {
   const [address, setAddress] = useState<string | null>(null)
@@ -71,8 +73,11 @@ export function WalletConnect() {
         params: [{ chainId: ARC_TESTNET.chainIdHex }],
       })
       setWrongNetwork(false)
-    } catch (switchError: any) {
-      if (switchError.code === 4902) {
+    } catch (switchError: unknown) {
+      const errorCode = typeof switchError === 'object' && switchError !== null && 'code' in switchError
+        ? (switchError as { code: number }).code
+        : null
+      if (errorCode === METAMASK_CHAIN_NOT_ADDED_ERROR_CODE) {
         await ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [
@@ -129,6 +134,7 @@ export function WalletConnect() {
         {wrongNetwork && (
           <button
             onClick={switchToArc}
+            aria-label="Switch to Arc Testnet"
             className="px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-medium hover:bg-orange-500/20 transition-colors"
           >
             Switch to Arc
@@ -145,12 +151,14 @@ export function WalletConnect() {
           href={`https://testnet.arcscan.app/address/${address}`}
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="View address on block explorer"
           className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
         >
           <ExternalLink className="w-4 h-4" />
         </a>
         <button
           onClick={handleDisconnect}
+          aria-label="Disconnect wallet"
           className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
         >
           <LogOut className="w-4 h-4" />
@@ -163,6 +171,7 @@ export function WalletConnect() {
     <button
       onClick={handleConnect}
       disabled={connecting}
+      aria-label={connecting ? 'Connecting wallet...' : 'Connect wallet'}
       className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-cyan-500 text-white font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
     >
       {connecting ? (

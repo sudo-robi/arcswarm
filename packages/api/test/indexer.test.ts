@@ -18,7 +18,7 @@ const mocks = vi.hoisted(() => {
   const prisma = {
     indexerCursor: { findUnique: vi.fn(), upsert: vi.fn() },
     vault: { findUnique: vi.fn(), update: vi.fn() },
-    transaction: { create: vi.fn() },
+    transaction: { create: vi.fn(), findUnique: vi.fn() },
     agent: { findUnique: vi.fn(), upsert: vi.fn() },
     riskAlert: { create: vi.fn() },
   };
@@ -37,6 +37,12 @@ vi.mock("@prisma/client", () => ({
   PrismaClient: vi.fn(() => mocks.prisma),
   AgentType: {},
 }));
+
+vi.mock("pino", () => {
+  const logger = { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
+  const pino = vi.fn(() => logger);
+  return { default: pino };
+});
 
 vi.mock("ethers", () => {
   const JsonRpcProvider = vi.fn(() => mocks.provider);
@@ -67,7 +73,7 @@ function makeEvent(args: Record<string, unknown>, blockNumber = 1, transactionHa
 function resetIndexerMocks() {
   vi.clearAllMocks();
 
-  mocks.provider.getBlockNumber.mockResolvedValue(1);
+  mocks.provider.getBlockNumber.mockResolvedValue(10);
   mocks.provider.getBlock.mockResolvedValue({ timestamp: TS });
 
   mocks.prisma.indexerCursor.findUnique.mockResolvedValue({ id: "main", lastBlock: 0n });
@@ -75,6 +81,7 @@ function resetIndexerMocks() {
   mocks.prisma.vault.findUnique.mockResolvedValue({ id: "vault-1" });
   mocks.prisma.vault.update.mockResolvedValue({});
   mocks.prisma.transaction.create.mockResolvedValue({ id: "tx" });
+  mocks.prisma.transaction.findUnique.mockResolvedValue(null);
   mocks.prisma.agent.findUnique.mockResolvedValue(null);
   mocks.prisma.agent.upsert.mockResolvedValue({});
   mocks.prisma.riskAlert.create.mockResolvedValue({ id: "alert" });
@@ -104,7 +111,6 @@ async function runOnce() {
 describe("indexer (packages/api/src/indexer.ts)", () => {
   beforeAll(async () => {
     vi.useFakeTimers();
-    vi.spyOn(console, "log").mockImplementation(() => {});
     // Importing the module triggers the initial runIndexer() + setInterval.
     await import("../src/indexer.js");
     await flush();
@@ -285,12 +291,12 @@ describe("indexer (packages/api/src/indexer.ts)", () => {
 
     await runOnce();
 
-    // Chunks: [1..2000], [2001..4000], [4001..4500]
+    // safeBlock = 4500 - 5 = 4495, Chunks: [1..2000], [2001..4000], [4001..4495]
     expect(mocks.prisma.indexerCursor.upsert).toHaveBeenCalledTimes(3);
     const upserts = mocks.prisma.indexerCursor.upsert.mock.calls.map((c: any[]) => c[0]);
     expect(upserts[0].update.lastBlock).toBe(2000n);
     expect(upserts[1].update.lastBlock).toBe(4000n);
-    expect(upserts[2].update.lastBlock).toBe(4500n);
+    expect(upserts[2].update.lastBlock).toBe(4495n);
   });
 
   it("starts indexing from the last indexed block + 1", async () => {
@@ -302,11 +308,12 @@ describe("indexer (packages/api/src/indexer.ts)", () => {
 
     await runOnce();
 
+    // safeBlock = 120 - 5 = 115
     const depositCalls = mocks.vaultContract.queryFilter.mock.calls.filter((c: any[]) => c[0] === "Deposited");
-    expect(depositCalls[0].slice(1)).toEqual([101, 120]);
+    expect(depositCalls[0].slice(1)).toEqual([101, 115]);
     expect(mocks.prisma.transaction.create).toHaveBeenCalled();
     expect(mocks.prisma.indexerCursor.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ update: { lastBlock: 120n } })
+      expect.objectContaining({ update: { lastBlock: 115n } })
     );
   });
 

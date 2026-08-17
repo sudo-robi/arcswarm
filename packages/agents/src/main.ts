@@ -29,6 +29,29 @@ async function main() {
 
   const coordinator = new CoordinatorAgent(config, provider);
 
+  let shuttingDown = false;
+
+  const gracefulShutdown = async (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info({ signal }, "Received shutdown signal, stopping swarm...");
+    try {
+      await coordinator.stopSwarm();
+      logger.info("Swarm stopped gracefully");
+      process.exit(0);
+    } catch (err) {
+      logger.error({ err }, "Error during graceful shutdown");
+      process.exit(1);
+    }
+  };
+
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+  process.on("unhandledRejection", (reason) => {
+    logger.error({ reason }, "Unhandled promise rejection");
+  });
+
   try {
     await coordinator.startSwarm();
   } catch (err) {

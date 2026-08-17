@@ -5,6 +5,8 @@ import { Shield, Zap, TrendingUp, CheckCircle, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
+const MOCK_DEPLOY_DELAY_MS = 1500
+
 interface VaultFormProps {
   onCreate?: (vaultId: string) => void
   onActivate?: () => void
@@ -23,7 +25,7 @@ export function VaultForm({ onCreate, onActivate, isActive = false, vaultId: pro
   const handleCreate = async () => {
     setCreating(true)
     try {
-      await new Promise(r => setTimeout(r, 1500))
+      await new Promise(r => setTimeout(r, MOCK_DEPLOY_DELAY_MS))
       const newVaultId = 'vault_' + Date.now()
       setLocalVaultId(newVaultId)
       setShowSuccess(true)
@@ -98,7 +100,7 @@ export function VaultForm({ onCreate, onActivate, isActive = false, vaultId: pro
 
   return (
     <Dialog open={isActive} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden" aria-label="Create Treasury Vault">
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold">Create Treasury</DialogTitle>
@@ -116,7 +118,8 @@ export function VaultForm({ onCreate, onActivate, isActive = false, vaultId: pro
               {riskOptions.map(({ value, label, description, icon: Icon, color, bg }) => (
                 <button
                   key={value}
-                  onClick={() => setRiskTolerance(value as any)}
+                  onClick={() => setRiskTolerance(value as 'CONSERVATIVE' | 'MODERATE' | 'AGGRESSIVE')}
+                  aria-pressed={riskTolerance === value}
                   className={`
                     p-4 rounded-xl border-2 text-left transition-all
                     ${riskTolerance === value 

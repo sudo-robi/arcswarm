@@ -25,22 +25,27 @@ contract AgentRegistryTest is Test {
 
     function testRegisterAgent_OnlyCoordinatorReverts() public {
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.NotCoordinator.selector));
         registry.registerAgent(yieldAgent, YIELD_ID, AgentRegistry.AgentType.YIELD, "Yield Agent");
     }
 
     function testRegisterAgent_DuplicateAgentIdReverts() public {
         registry.registerAgent(yieldAgent, YIELD_ID, AgentRegistry.AgentType.YIELD, "Yield Agent");
 
-        vm.expectRevert("Agent ID exists");
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.AgentIdExists.selector));
         registry.registerAgent(fxAgent, YIELD_ID, AgentRegistry.AgentType.FX, "FX Agent");
     }
 
     function testRegisterAgent_AlreadyRegisteredReverts() public {
         registry.registerAgent(yieldAgent, YIELD_ID, AgentRegistry.AgentType.YIELD, "Yield Agent");
 
-        vm.expectRevert("Already registered");
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.AlreadyRegistered.selector));
         registry.registerAgent(yieldAgent, FX_ID, AgentRegistry.AgentType.FX, "FX Agent");
+    }
+
+    function testRegisterAgent_ZeroAddressReverts() public {
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.ZeroAddress.selector));
+        registry.registerAgent(address(0), YIELD_ID, AgentRegistry.AgentType.YIELD, "Zero Agent");
     }
 
     function testRegisterAgent_Success() public {
@@ -128,7 +133,7 @@ contract AgentRegistryTest is Test {
         registry.registerAgent(yieldAgent, YIELD_ID, AgentRegistry.AgentType.YIELD, "Yield Agent");
 
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.NotCoordinator.selector));
         registry.updateReputation(yieldAgent, 10, "reason");
     }
 
@@ -136,7 +141,7 @@ contract AgentRegistryTest is Test {
         registry.registerAgent(yieldAgent, YIELD_ID, AgentRegistry.AgentType.YIELD, "Yield Agent");
         registry.deactivateAgent(yieldAgent);
 
-        vm.expectRevert("Agent not active");
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.AgentNotActive.selector));
         registry.updateReputation(yieldAgent, 10, "reason");
     }
 
@@ -209,7 +214,7 @@ contract AgentRegistryTest is Test {
         registry.registerAgent(yieldAgent, YIELD_ID, AgentRegistry.AgentType.YIELD, "Yield Agent");
 
         vm.prank(alice);
-        vm.expectRevert("Not registered agent");
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.NotRegisteredAgent.selector));
         registry.touchAgent(yieldAgent);
 
         vm.warp(block.timestamp + 1000);
@@ -235,7 +240,7 @@ contract AgentRegistryTest is Test {
         registry.registerAgent(yieldAgent, YIELD_ID, AgentRegistry.AgentType.YIELD, "Yield Agent");
 
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(AgentRegistry.NotCoordinator.selector));
         registry.deactivateAgent(yieldAgent);
     }
 

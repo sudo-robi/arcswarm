@@ -3,6 +3,10 @@ pragma solidity ^0.8.26;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
+/// @title RiskOracle
+/// @notice On-chain risk assessment oracle for the ArcSwarm protocol.
+///         Computes a composite risk score from drawdown, exposure, and time
+///         metrics, and can trigger a circuit-breaker pause.
 contract RiskOracle is AccessControl {
     bytes32 public constant COORDINATOR_ROLE = keccak256("COORDINATOR_ROLE");
     bytes32 public constant RISK_AGENT_ROLE = keccak256("RISK_AGENT_ROLE");
@@ -40,13 +44,19 @@ contract RiskOracle is AccessControl {
     event RiskAgentAdded(address agent);
     event RiskAgentRemoved(address agent);
 
+    error NotCoordinator();
+    error NotRiskAgent();
+    error ZeroAddress();
+    error InvalidThreshold();
+    error InvalidCooldownPeriod();
+
     modifier onlyCoordinator() {
-        require(hasRole(COORDINATOR_ROLE, msg.sender), "Not coordinator");
+        if (!hasRole(COORDINATOR_ROLE, msg.sender)) revert NotCoordinator();
         _;
     }
 
     modifier onlyRiskAgent() {
-        require(hasRole(RISK_AGENT_ROLE, msg.sender), "Not risk agent");
+        if (!hasRole(RISK_AGENT_ROLE, msg.sender)) revert NotRiskAgent();
         _;
     }
 
@@ -62,12 +72,17 @@ contract RiskOracle is AccessControl {
         });
     }
 
+    /// @notice Update the risk thresholds used for scoring and circuit-breaker logic.
+    /// @dev maxDrawdown and maxExposure are used as divisors — must be > 0.
     function setThreshold(
         uint256 _maxDrawdown,
         uint256 _maxConcentration,
         uint256 _maxExposure,
         uint256 _cooldownPeriod
     ) external onlyCoordinator {
+        if (_maxDrawdown == 0 || _maxExposure == 0) revert InvalidThreshold();
+        if (_cooldownPeriod == 0) revert InvalidCooldownPeriod();
+
         threshold = RiskThreshold({
             maxDrawdown: _maxDrawdown,
             maxConcentration: _maxConcentration,
@@ -77,6 +92,8 @@ contract RiskOracle is AccessControl {
         emit RiskThresholdUpdated(_maxDrawdown, _maxConcentration, _maxExposure);
     }
 
+    /// @notice Push fresh risk metrics from a risk agent. Recomputes the risk
+    ///         score and may trigger the circuit breaker.
     function updateMetrics(
         uint256 _totalExposure,
         uint256 _currentDrawdown
@@ -111,15 +128,19 @@ contract RiskOracle is AccessControl {
         emit RiskCheckCompleted(newRiskScore, !shouldBreak);
     }
 
+    /// @dev Internal risk score calculation (0-100).
+    /// @param includeBreakerBonus Whether to add +10 for an active circuit breaker.
     function _calculateRiskScore(bool includeBreakerBonus) internal view returns (uint256) {
         uint256 score = 0;
 
         // Drawdown risk (0-40 points)
+        // Safe: threshold.maxDrawdown is validated > 0 in setThreshold
         if (metrics.currentDrawdown > 0) {
             score += (metrics.currentDrawdown * 40) / threshold.maxDrawdown;
         }
 
         // Exposure risk (0-30 points)
+        // Safe: threshold.maxExposure is validated > 0 in setThreshold
         if (metrics.totalExposure > 0) {
             score += (metrics.totalExposure * 30) / threshold.maxExposure;
         }
@@ -165,13 +186,25 @@ contract RiskOracle is AccessControl {
     }
 
     function addRiskAgent(address agent) external onlyCoordinator {
+        if (agent == address(0)) revert ZeroAddress();
         riskAgents.push(agent);
         _grantRole(RISK_AGENT_ROLE, agent);
         emit RiskAgentAdded(agent);
     }
 
+    /// @notice Revoke the RISK_AGENT_ROLE and remove from tracking array.
     function removeRiskAgent(address agent) external onlyCoordinator {
         _revokeRole(RISK_AGENT_ROLE, agent);
+
+        // Remove from riskAgents array to keep state consistent
+        for (uint256 i = 0; i < riskAgents.length; i++) {
+            if (riskAgents[i] == agent) {
+                riskAgents[i] = riskAgents[riskAgents.length - 1];
+                riskAgents.pop();
+                break;
+            }
+        }
+
         emit RiskAgentRemoved(agent);
     }
 
@@ -181,5 +214,9 @@ contract RiskOracle is AccessControl {
 
     function getMetrics() external view returns (RiskMetrics memory) {
         return metrics;
+    }
+
+    function getRiskAgentsLength() external view returns (uint256) {
+        return riskAgents.length;
     }
 }

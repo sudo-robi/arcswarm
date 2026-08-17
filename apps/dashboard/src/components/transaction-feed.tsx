@@ -1,4 +1,4 @@
-import { ArrowUpRight, Clock } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 interface TransactionFeedProps {
   vaultId?: string
@@ -6,7 +6,7 @@ interface TransactionFeedProps {
 
 export function TransactionFeed(_props: TransactionFeedProps) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <div className="rounded-2xl border border-border bg-card p-6" aria-label="Live transactions feed">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold">Live Transactions</h3>

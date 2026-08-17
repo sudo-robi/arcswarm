@@ -53,6 +53,7 @@ export function AgentGrid() {
                       href={`https://testnet.arcscan.app/address/${agent.address}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`View agent ${agent.name} on block explorer`}
                       className="font-mono hover:text-primary transition-colors flex items-center gap-1"
                     >
                       {agent.address.slice(0, 6)}...{agent.address.slice(-4)}

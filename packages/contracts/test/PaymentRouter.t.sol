@@ -72,21 +72,21 @@ contract PaymentRouterTest is Test {
         usdc.mint(alice, 10_000e6);
         usdc.approve(address(router), 10_000e6);
 
-        vm.expectRevert("Not agent");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.NotAgent.selector));
         router.executePayment(riskAgent, 1_000e6, "memo");
         vm.stopPrank();
     }
 
     function testExecutePayment_ZeroAmountReverts() public {
         vm.prank(yieldAgent);
-        vm.expectRevert("Zero amount");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.ZeroAmount.selector));
         router.executePayment(riskAgent, 0, "memo");
     }
 
     function testExecutePayment_InsufficientBalanceReverts() public {
         // Agent with no USDC.
         vm.prank(riskAgent);
-        vm.expectRevert("Insufficient balance");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.InsufficientBalance.selector));
         router.executePayment(yieldAgent, 1e6, "memo");
     }
 
@@ -177,20 +177,20 @@ contract PaymentRouterTest is Test {
         vm.startPrank(yieldAgent);
         usdc.approve(address(router), 10_000e6);
 
-        vm.expectRevert("Exceeds nanopayment limit");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.ExceedsNanopaymentLimit.selector));
         router.executeNanopayment(riskAgent, limit + 1, "too-big");
         vm.stopPrank();
     }
 
     function testNanopayment_ZeroAmountReverts() public {
         vm.prank(yieldAgent);
-        vm.expectRevert("Zero amount");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.ZeroAmount.selector));
         router.executeNanopayment(riskAgent, 0, "zero");
     }
 
     function testNanopayment_InsufficientBalanceReverts() public {
         vm.prank(riskAgent);
-        vm.expectRevert("Insufficient balance");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.InsufficientBalance.selector));
         router.executeNanopayment(yieldAgent, 1000, "no-funds");
     }
 
@@ -199,7 +199,7 @@ contract PaymentRouterTest is Test {
         usdc.mint(alice, 10_000e6);
         usdc.approve(address(router), 10_000e6);
 
-        vm.expectRevert("Not agent");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.NotAgent.selector));
         router.executeNanopayment(riskAgent, 1000, "not-agent");
         vm.stopPrank();
     }
@@ -214,7 +214,7 @@ contract PaymentRouterTest is Test {
         amounts[0] = 1_000e6;
         string[] memory memos = new string[](2);
 
-        vm.expectRevert("Length mismatch");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.LengthMismatch.selector));
         router.executeBatchPayments(recipients, amounts, memos);
     }
 
@@ -227,7 +227,7 @@ contract PaymentRouterTest is Test {
         amounts[1] = 2_000e6;
         string[] memory memos = new string[](1);
 
-        vm.expectRevert("Length mismatch");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.LengthMismatch.selector));
         router.executeBatchPayments(recipients, amounts, memos);
     }
 
@@ -236,7 +236,7 @@ contract PaymentRouterTest is Test {
         uint256[] memory amounts = new uint256[](0);
         string[] memory memos = new string[](0);
 
-        vm.expectRevert("Empty batch");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.EmptyBatch.selector));
         router.executeBatchPayments(recipients, amounts, memos);
     }
 
@@ -248,7 +248,7 @@ contract PaymentRouterTest is Test {
         string[] memory memos = new string[](1);
         memos[0] = "zero";
 
-        vm.expectRevert("Zero amount in batch");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.ZeroAmountInBatch.selector));
         router.executeBatchPayments(recipients, amounts, memos);
     }
 
@@ -260,7 +260,7 @@ contract PaymentRouterTest is Test {
         string[] memory memos = new string[](1);
         memos[0] = "too-much";
 
-        vm.expectRevert("Insufficient batch balance");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.InsufficientBatchBalance.selector));
         router.executeBatchPayments(recipients, amounts, memos);
     }
 
@@ -308,7 +308,7 @@ contract PaymentRouterTest is Test {
         memos[0] = "memo";
 
         vm.prank(yieldAgent);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.NotCoordinator.selector));
         router.executeBatchPayments(recipients, amounts, memos);
     }
 
@@ -316,7 +316,7 @@ contract PaymentRouterTest is Test {
 
     function testSetNanopaymentLimit_OnlyCoordinator() public {
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.NotCoordinator.selector));
         router.setNanopaymentLimit(5e4);
     }
 
@@ -334,7 +334,7 @@ contract PaymentRouterTest is Test {
         vm.startPrank(yieldAgent);
         usdc.approve(address(router), 10_000e6);
 
-        vm.expectRevert("Exceeds nanopayment limit");
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.ExceedsNanopaymentLimit.selector));
         router.executeNanopayment(riskAgent, 501, "over-new-limit");
 
         router.executeNanopayment(riskAgent, 500, "at-new-limit");
@@ -342,5 +342,12 @@ contract PaymentRouterTest is Test {
 
         assertEq(router.getNanopaymentCount(), 1);
         assertEq(usdc.balanceOf(riskAgent), 500);
+    }
+
+    // ---------- constructor ----------
+
+    function testConstructor_ZeroAddressReverts() public {
+        vm.expectRevert(abi.encodeWithSelector(PaymentRouter.ZeroAddress.selector));
+        new PaymentRouter(address(0));
     }
 }

@@ -21,8 +21,9 @@ export function useVaultData(intervalMs = 30000, initialDelayMs = 3000) {
       const vault = await fetchVaultData()
       if (mounted.current) setData(vault)
       setError(null)
-    } catch (e: any) {
-      if (mounted.current) setError(e.message ?? 'Failed to fetch vault data')
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to fetch vault data'
+      if (mounted.current) setError(message)
     } finally {
       if (mounted.current) setLoading(false)
     }
@@ -49,8 +50,9 @@ export function useAgentInfos(intervalMs = 30000, initialDelayMs = 10000) {
       const agents = await fetchAgentInfos()
       if (mounted.current) setData(agents)
       setError(null)
-    } catch (e: any) {
-      if (mounted.current) setError(e.message ?? 'Failed to fetch agents')
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to fetch agents'
+      if (mounted.current) setError(message)
     } finally {
       if (mounted.current) setLoading(false)
     }
@@ -77,8 +79,9 @@ export function useRiskMetrics(intervalMs = 30000, initialDelayMs = 20000) {
       const risk = await fetchRiskMetrics()
       if (mounted.current) setData(risk)
       setError(null)
-    } catch (e: any) {
-      if (mounted.current) setError(e.message ?? 'Failed to fetch risk metrics')
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to fetch risk metrics'
+      if (mounted.current) setError(message)
     } finally {
       if (mounted.current) setLoading(false)
     }
@@ -105,8 +108,9 @@ export function usePaymentStats(intervalMs = 30000, initialDelayMs = 30000) {
       const stats = await fetchPaymentStats()
       if (mounted.current) setData(stats)
       setError(null)
-    } catch (e: any) {
-      if (mounted.current) setError(e.message ?? 'Failed to fetch payment stats')
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to fetch payment stats'
+      if (mounted.current) setError(message)
     } finally {
       if (mounted.current) setLoading(false)
     }

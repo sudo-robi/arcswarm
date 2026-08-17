@@ -34,6 +34,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: `${getApiUrl()}/trpc`,
           transformer: superjson,
+          headers() {
+            const walletAddress = localStorage.getItem('arcswarm_wallet');
+            if (walletAddress) {
+              return { Authorization: `Bearer ${walletAddress}` };
+            }
+            return {};
+          },
         }),
         wsLink({
           client: createWSClient({

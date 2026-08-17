@@ -2,11 +2,15 @@ import { useRiskMetrics } from '@/lib/hooks'
 import { RISK_ORACLE_ADDRESS } from '@/lib/contracts'
 import { Shield, ShieldCheck, ShieldAlert, AlertTriangle, Loader2, ExternalLink } from 'lucide-react'
 
+const RISK_THRESHOLDS = {
+  ELEVATED: 70,
+  MODERATE: 40,
+} as const
+
 export function RiskPanel() {
   const risk = useRiskMetrics(10000)
 
   const riskScore = risk.data?.riskScore ?? '0'
-  const healthy = risk.data?.healthy ?? true
   const paused = risk.data?.paused ?? false
   const totalExposure = risk.data?.totalExposure ?? '0'
   const currentDrawdown = risk.data?.currentDrawdown ?? '0'
@@ -24,12 +28,12 @@ export function RiskPanel() {
     statusText = 'Circuit Breaker Active'
     statusColor = 'text-red-400'
     StatusIcon = ShieldAlert
-  } else if (scoreNum > 70) {
+  } else if (scoreNum > RISK_THRESHOLDS.ELEVATED) {
     gaugeColor = 'from-orange-500 to-red-500'
     statusText = 'Elevated Risk'
     statusColor = 'text-orange-400'
     StatusIcon = AlertTriangle
-  } else if (scoreNum > 40) {
+  } else if (scoreNum > RISK_THRESHOLDS.MODERATE) {
     gaugeColor = 'from-yellow-500 to-orange-500'
     statusText = 'Moderate'
     statusColor = 'text-yellow-400'
@@ -44,6 +48,7 @@ export function RiskPanel() {
           href={`https://testnet.arcscan.app/address/${RISK_ORACLE_ADDRESS}`}
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="View RiskOracle contract on block explorer"
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
         >
           RiskOracle
@@ -59,7 +64,7 @@ export function RiskPanel() {
       ) : (
         <>
           <div className="flex items-center justify-center mb-6">
-            <div className="relative w-40 h-40">
+            <div className="relative w-40 h-40" role="img" aria-label={`Risk score: ${riskScore} out of 100`}>
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted/30" />
                 <circle
@@ -88,7 +93,7 @@ export function RiskPanel() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="flex items-center justify-center gap-2 mb-6" aria-live="polite">
             <StatusIcon className={`w-4 h-4 ${statusColor}`} />
             <span className={`text-sm font-medium ${statusColor}`}>{statusText}</span>
           </div>

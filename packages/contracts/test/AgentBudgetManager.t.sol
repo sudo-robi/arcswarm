@@ -22,12 +22,12 @@ contract AgentBudgetManagerTest is Test {
 
     function testAllocate_OnlyCoordinatorReverts() public {
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.NotCoordinator.selector));
         budgetManager.allocate(yieldAgent, 100e6);
     }
 
     function testAllocate_ZeroAmountReverts() public {
-        vm.expectRevert("Zero allocation");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.ZeroAllocation.selector));
         budgetManager.allocate(yieldAgent, 0);
     }
 
@@ -64,11 +64,11 @@ contract AgentBudgetManagerTest is Test {
     function testAllocate_CooldownReverts() public {
         budgetManager.allocate(yieldAgent, 100e6);
 
-        vm.expectRevert("Allocation cooldown");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AllocationCooldown.selector));
         budgetManager.allocate(yieldAgent, 50e6);
 
         vm.warp(block.timestamp + 59);
-        vm.expectRevert("Allocation cooldown");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AllocationCooldown.selector));
         budgetManager.allocate(yieldAgent, 50e6);
 
         vm.warp(block.timestamp + 1);
@@ -79,7 +79,7 @@ contract AgentBudgetManagerTest is Test {
     function testAllocate_FirstAllocationCooldown() public {
         // Fresh budget, but block.timestamp is still under 60s.
         vm.warp(10);
-        vm.expectRevert("Allocation cooldown");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AllocationCooldown.selector));
         budgetManager.allocate(fxAgent, 10e6);
     }
 
@@ -88,7 +88,7 @@ contract AgentBudgetManagerTest is Test {
         budgetManager.deactivateAgent(yieldAgent);
         vm.warp(block.timestamp + 60);
 
-        vm.expectRevert("Agent inactive");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AgentInactive.selector));
         budgetManager.allocate(yieldAgent, 50e6);
     }
 
@@ -116,13 +116,13 @@ contract AgentBudgetManagerTest is Test {
         budgetManager.allocate(yieldAgent, 100e6);
         assertTrue(budgetManager.spend(yieldAgent, 80e6));
 
-        vm.expectRevert("Insufficient budget");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.InsufficientBudget.selector));
         budgetManager.spend(yieldAgent, 30e6);
     }
 
     function testSpend_UnallocatedAgentReverts() public {
         // A never-allocated agent is not active, so spend() blocks earlier.
-        vm.expectRevert("Agent not active");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AgentNotActive.selector));
         budgetManager.spend(yieldAgent, 1e6);
     }
 
@@ -130,7 +130,7 @@ contract AgentBudgetManagerTest is Test {
         budgetManager.allocate(yieldAgent, 100e6);
         budgetManager.deactivateAgent(yieldAgent);
 
-        vm.expectRevert("Agent not active");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AgentNotActive.selector));
         budgetManager.spend(yieldAgent, 10e6);
     }
 
@@ -140,7 +140,7 @@ contract AgentBudgetManagerTest is Test {
         budgetManager.allocate(yieldAgent, 100e6);
 
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.NotCoordinator.selector));
         budgetManager.deactivateAgent(yieldAgent);
     }
 
@@ -185,7 +185,7 @@ contract AgentBudgetManagerTest is Test {
 
     function testSetAllocationCooldown_OnlyCoordinator() public {
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.NotCoordinator.selector));
         budgetManager.setAllocationCooldown(120);
     }
 
@@ -194,7 +194,7 @@ contract AgentBudgetManagerTest is Test {
         budgetManager.setAllocationCooldown(600);
 
         vm.warp(block.timestamp + 300);
-        vm.expectRevert("Allocation cooldown");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AllocationCooldown.selector));
         budgetManager.allocate(yieldAgent, 10e6);
 
         vm.warp(block.timestamp + 301);

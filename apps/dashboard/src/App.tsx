@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { WalletConnect } from '@/components/wallet-connect'
 import { StatsCards } from '@/components/stats-cards'
 import { AgentGrid } from '@/components/agent-grid'
 import { RiskPanel } from '@/components/risk-panel'
 import { TreasuryOverview } from '@/components/treasury-overview'
-import { useVaultData, useAgentInfos, useRiskMetrics, usePaymentStats } from '@/lib/hooks'
+import { useVaultData, useAgentInfos } from '@/lib/hooks'
 import { VAULT_ADDRESS } from '@/lib/contracts'
 import { 
   Shield, 
@@ -43,6 +43,7 @@ function Sidebar({ isOpen, onClose, activeTab, onTabChange }: {
         <div 
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
       
@@ -64,11 +65,12 @@ function Sidebar({ isOpen, onClose, activeTab, onTabChange }: {
             </div>
           </div>
 
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-1" aria-label="Main navigation">
             {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => { onTabChange(id); onClose() }}
+                aria-current={activeTab === id ? 'page' : undefined}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
                   activeTab === id
                     ? 'bg-primary/10 text-primary font-medium'
@@ -108,14 +110,14 @@ function NotificationsPanel({ open, onClose }: { open: boolean; onClose: () => v
   if (!open) return null
 
   return (
-    <div className="absolute top-14 right-4 w-80 max-h-96 overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl z-50">
+    <div className="absolute top-14 right-4 w-80 max-h-96 overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl z-50" aria-label="Notifications panel">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="font-semibold text-sm">Notifications</h3>
-        <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">Clear all</button>
+        <button onClick={onClose} aria-label="Clear all notifications" className="text-xs text-muted-foreground hover:text-foreground">Clear all</button>
       </div>
       <div className="divide-y divide-border">
         {notifications.map(n => (
-          <div key={n.id} className="p-4 hover:bg-muted/50 transition-colors">
+          <div key={n.id} className="p-4 hover:bg-muted/50 transition-colors" aria-label={`${n.title}: ${n.desc}`}>
             <div className="flex items-start gap-3">
               <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
                 n.type === 'success' ? 'bg-emerald-500' : n.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
@@ -137,10 +139,10 @@ function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }
   if (!open) return null
 
   return (
-    <div className="absolute top-14 right-4 w-72 rounded-2xl border border-border bg-card shadow-2xl z-50">
+    <div className="absolute top-14 right-4 w-72 rounded-2xl border border-border bg-card shadow-2xl z-50" aria-label="Settings panel">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="font-semibold text-sm">Settings</h3>
-        <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">Close</button>
+        <button onClick={onClose} aria-label="Close settings" className="text-xs text-muted-foreground hover:text-foreground">Close</button>
       </div>
       <div className="p-4 space-y-4">
         <div>
@@ -205,6 +207,7 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
         <div className="flex items-center gap-4">
           <button 
             onClick={onMenuClick}
+            aria-label="Open navigation menu"
             className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
           >
             <Menu className="w-5 h-5" />
@@ -214,6 +217,7 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
             <input 
               type="text" 
               placeholder="Search agents, transactions..." 
+              aria-label="Search agents and transactions"
               className="bg-transparent text-sm focus:outline-none w-full"
             />
             <kbd className="hidden lg:inline-flex h-5 items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">
@@ -224,6 +228,8 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
         <div className="flex items-center gap-2 sm:gap-3 relative">
           <button 
             onClick={() => { setNotifsOpen(!notifsOpen); setSettingsOpen(false) }}
+            aria-label="Notifications"
+            aria-expanded={notifsOpen}
             className="relative p-2 rounded-lg hover:bg-muted transition-colors"
           >
             <Bell className="w-5 h-5 text-muted-foreground" />
@@ -231,6 +237,8 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
           </button>
           <button 
             onClick={() => { setSettingsOpen(!settingsOpen); setNotifsOpen(false) }}
+            aria-label="Settings"
+            aria-expanded={settingsOpen}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
           >
             <Settings className="w-5 h-5 text-muted-foreground" />

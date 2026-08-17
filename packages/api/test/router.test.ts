@@ -33,6 +33,7 @@ const mocks = vi.hoisted(() => {
       count: vi.fn(),
     },
     riskAlert: {
+      findUnique: vi.fn(),
       findMany: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -57,10 +58,17 @@ vi.mock("ethers", () => {
   return { ethers: { JsonRpcProvider, Contract }, JsonRpcProvider, Contract };
 });
 
+vi.mock("pino", () => {
+  const logger = { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
+  const pino = vi.fn(() => logger);
+  return { default: pino };
+});
+
 import { appRouter } from "../src/router.js";
 
 type Caller = ReturnType<typeof appRouter.createCaller>;
 let caller: Caller;
+let authCaller: Caller;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -71,7 +79,8 @@ beforeEach(() => {
   mocks.riskOracleContract.checkHealth.mockResolvedValue([true, 42n]);
   mocks.riskOracleContract.getRiskScore.mockResolvedValue(42n);
 
-  caller = appRouter.createCaller({ prisma: mocks.prisma } as any);
+  caller = appRouter.createCaller({ prisma: mocks.prisma, isAuthenticated: false } as any);
+  authCaller = appRouter.createCaller({ prisma: mocks.prisma, isAuthenticated: true, walletAddress: "0x1234567890abcdef1234567890abcdef12345678" } as any);
 });
 
 afterEach(() => {
@@ -81,7 +90,7 @@ afterEach(() => {
 const sampleVault = {
   id: "vault-1",
   address: "0x86014c6473574f93d4bfc386541681f8c1200160",
-  userId: "user-1",
+  userId: "0x1234567890abcdef1234567890abcdef12345678",
   riskTolerance: "MODERATE",
   totalDeposits: 800000n,
   totalYield: 200000n,
@@ -110,7 +119,7 @@ describe("appRouter", () => {
 
     it("returns null when the vault does not exist", async () => {
       mocks.prisma.vault.findUnique.mockResolvedValue(null);
-      const result = await caller.vault.get({ address: "0xabc" });
+      const result = await caller.vault.get({ address: "0x0000000000000000000000000000000000000001" });
       expect(result).toBeNull();
       expect(mocks.vaultContract.getVaultBalance).not.toHaveBeenCalled();
     });
@@ -133,11 +142,11 @@ describe("appRouter", () => {
   describe("vault.create", () => {
     it("defaults riskTolerance to MODERATE", async () => {
       mocks.prisma.vault.create.mockResolvedValue(sampleVault);
-      await caller.vault.create({ userId: "user-1" });
+      await authCaller.vault.create({});
       expect(mocks.prisma.vault.create).toHaveBeenCalledWith({
         data: {
           address: "0x86014c6473574F93d4BFc386541681f8c1200160",
-          userId: "user-1",
+          userId: "0x1234567890abcdef1234567890abcdef12345678",
           riskTolerance: "MODERATE",
         },
       });
@@ -145,47 +154,57 @@ describe("appRouter", () => {
 
     it("persists an explicit riskTolerance", async () => {
       mocks.prisma.vault.create.mockResolvedValue(sampleVault);
-      await caller.vault.create({ userId: "user-1", riskTolerance: "AGGRESSIVE" });
+      await authCaller.vault.create({ riskTolerance: "AGGRESSIVE" });
       expect(mocks.prisma.vault.create).toHaveBeenCalledWith({
-        data: { address: expect.any(String), userId: "user-1", riskTolerance: "AGGRESSIVE" },
+        data: { address: expect.any(String), userId: "0x1234567890abcdef1234567890abcdef12345678", riskTolerance: "AGGRESSIVE" },
       });
     });
 
     it("rejects an invalid riskTolerance enum value", async () => {
-      await expect(caller.vault.create({ userId: "u", riskTolerance: "WILD" as any })).rejects.toMatchObject({
+      await expect(authCaller.vault.create({ riskTolerance: "WILD" as any })).rejects.toMatchObject({
         code: "BAD_REQUEST",
       });
     });
 
-    it("requires userId", async () => {
-      await expect(caller.vault.create({} as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    it("rejects unauthenticated calls", async () => {
+      await expect(caller.vault.create({})).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     });
 
     it("returns the created vault", async () => {
       mocks.prisma.vault.create.mockResolvedValue(sampleVault);
-      const result = await caller.vault.create({ userId: "user-1" });
+      const result = await authCaller.vault.create({});
       expect(result).toEqual(sampleVault);
     });
   });
 
   describe("vault.activate", () => {
     it("sets isActive true for the given vault id", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       mocks.prisma.vault.update.mockResolvedValue({ ...sampleVault, isActive: true });
-      await caller.vault.activate({ vaultId: "vault-1" });
+      await authCaller.vault.activate({ vaultId: "vault-1" });
       expect(mocks.prisma.vault.update).toHaveBeenCalledWith({
         where: { id: "vault-1" },
         data: { isActive: true },
       });
     });
 
+    it("throws NOT_FOUND for unknown vault", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(null);
+      await expect(authCaller.vault.activate({ vaultId: "missing" })).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+
+    it("rejects unauthenticated calls", async () => {
+      await expect(caller.vault.activate({ vaultId: "vault-1" })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    });
+
     it("requires a vaultId", async () => {
-      await expect(caller.vault.activate({} as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      await expect(authCaller.vault.activate({} as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
     });
   });
 
   describe("vault.getLiveData", () => {
     it("returns live on-chain numbers as strings", async () => {
-      const result = await caller.vault.getLiveData({ vaultAddress: "0xanything" });
+      const result = await caller.vault.getLiveData({ vaultAddress: "0x0000000000000000000000000000000000000001" });
       expect(result).toEqual({ balance: "1000000", totalDeposits: "800000", totalYield: "200000" });
     });
 
@@ -230,9 +249,9 @@ describe("appRouter", () => {
       expect(mocks.prisma.agent.findUnique).toHaveBeenCalledWith({ where: { id: "agent-1" } });
     });
 
-    it("returns null when not found", async () => {
+    it("throws NOT_FOUND when not found", async () => {
       mocks.prisma.agent.findUnique.mockResolvedValue(null);
-      expect(await caller.agent.get({ id: "missing" })).toBeNull();
+      await expect(caller.agent.get({ id: "missing" })).rejects.toMatchObject({ code: "NOT_FOUND" });
     });
 
     it("requires an id", async () => {
@@ -241,11 +260,12 @@ describe("appRouter", () => {
   });
 
   describe("agent.update", () => {
-    const agent = { id: "agent-1", budget: 5n, spent: 1n, active: true };
+    const agent = { id: "agent-1", budget: 5n, spent: 1n, active: true, vault: { userId: "0x1234567890abcdef1234567890abcdef12345678" } };
 
     it("updates only the provided fields and stamps updatedAt", async () => {
+      mocks.prisma.agent.findUnique.mockResolvedValue(agent);
       mocks.prisma.agent.update.mockResolvedValue(agent);
-      await caller.agent.update({ id: "agent-1", budget: 5000n });
+      await authCaller.agent.update({ id: "agent-1", budget: 5000n });
       const payload = mocks.prisma.agent.update.mock.calls[0][0] as any;
       expect(payload).toEqual({
         where: { id: "agent-1" },
@@ -258,6 +278,7 @@ describe("appRouter", () => {
     });
 
     it("accepts every optional field", async () => {
+      mocks.prisma.agent.findUnique.mockResolvedValue(agent);
       mocks.prisma.agent.update.mockResolvedValue(agent);
       const input = {
         id: "agent-1",
@@ -267,7 +288,7 @@ describe("appRouter", () => {
         reputation: 90,
         lastActiveAt: new Date("2024-05-05"),
       };
-      await caller.agent.update(input);
+      await authCaller.agent.update(input);
       const payload = mocks.prisma.agent.update.mock.calls[0][0] as any;
       expect(payload.data).toMatchObject({
         budget: 1n,
@@ -278,51 +299,68 @@ describe("appRouter", () => {
       });
     });
 
+    it("throws NOT_FOUND for unknown agent", async () => {
+      mocks.prisma.agent.findUnique.mockResolvedValue(null);
+      await expect(authCaller.agent.update({ id: "missing", budget: 1n })).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+
+    it("rejects unauthenticated calls", async () => {
+      await expect(caller.agent.update({ id: "a", budget: 1n })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    });
+
     it("rejects a wrong type for budget (number instead of bigint)", async () => {
-      await expect(caller.agent.update({ id: "a", budget: 5000 as any })).rejects.toMatchObject({
+      mocks.prisma.agent.findUnique.mockResolvedValue(agent);
+      await expect(authCaller.agent.update({ id: "a", budget: 5000 as any })).rejects.toMatchObject({
         code: "BAD_REQUEST",
       });
     });
 
     it("requires an id", async () => {
-      await expect(caller.agent.update({} as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      await expect(authCaller.agent.update({} as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
     });
   });
 
   describe("agent.create", () => {
     it("defaults budget to 0n", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       mocks.prisma.agent.create.mockResolvedValue({});
-      await caller.agent.create({
+      await authCaller.agent.create({
         vaultId: "vault-1",
         type: "YIELD",
-        walletAddress: "0xabc",
+        walletAddress: "0x0000000000000000000000000000000000000001",
       });
       expect(mocks.prisma.agent.create).toHaveBeenCalledWith({
-        data: { vaultId: "vault-1", type: "YIELD", walletAddress: "0xabc", budget: 0n },
+        data: { vaultId: "vault-1", type: "YIELD", walletAddress: "0x0000000000000000000000000000000000000001", budget: 0n },
       });
     });
 
     it("persists an explicit budget", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       mocks.prisma.agent.create.mockResolvedValue({});
-      await caller.agent.create({
+      await authCaller.agent.create({
         vaultId: "vault-1",
         type: "COORDINATOR",
-        walletAddress: "0xabc",
+        walletAddress: "0x0000000000000000000000000000000000000001",
         budget: 999n,
       });
       expect(mocks.prisma.agent.create).toHaveBeenCalledWith({
-        data: { vaultId: "vault-1", type: "COORDINATOR", walletAddress: "0xabc", budget: 999n },
+        data: { vaultId: "vault-1", type: "COORDINATOR", walletAddress: "0x0000000000000000000000000000000000000001", budget: 999n },
       });
     });
 
     it("rejects an invalid agent type enum", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       await expect(
-        caller.agent.create({ vaultId: "v", type: "MAGIC" as any, walletAddress: "0x1" })
+        authCaller.agent.create({ vaultId: "v", type: "MAGIC" as any, walletAddress: "0x0000000000000000000000000000000000000001" })
       ).rejects.toMatchObject({ code: "BAD_REQUEST" });
     });
 
+    it("rejects unauthenticated calls", async () => {
+      await expect(caller.agent.create({ vaultId: "v", type: "YIELD", walletAddress: "0x0000000000000000000000000000000000000001" })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    });
+
     it("requires vaultId, type and walletAddress", async () => {
-      await expect(caller.agent.create({} as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      await expect(authCaller.agent.create({} as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
     });
   });
 
@@ -374,28 +412,35 @@ describe("appRouter", () => {
   describe("transaction.create", () => {
     const input = {
       vaultId: "v-1",
-      fromAddress: "0xa",
-      toAddress: "0xb",
+      fromAddress: "0x0000000000000000000000000000000000000001",
+      toAddress: "0x0000000000000000000000000000000000000002",
       amount: 1000n,
       type: "PAYMENT" as const,
     };
 
     it("creates a transaction with the given data", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       mocks.prisma.transaction.create.mockResolvedValue({ id: "tx-1" });
-      await caller.transaction.create(input);
+      await authCaller.transaction.create(input);
       expect(mocks.prisma.transaction.create).toHaveBeenCalledWith({ data: input });
     });
 
     it("rejects an invalid type enum", async () => {
-      await expect(caller.transaction.create({ ...input, type: "NOPE" as any })).rejects.toMatchObject({
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
+      await expect(authCaller.transaction.create({ ...input, type: "NOPE" as any })).rejects.toMatchObject({
         code: "BAD_REQUEST",
       });
     });
 
     it("rejects a missing amount", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       await expect(
-        caller.transaction.create({ ...input, amount: undefined as any })
+        authCaller.transaction.create({ ...input, amount: undefined as any })
       ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    });
+
+    it("rejects unauthenticated calls", async () => {
+      await expect(caller.transaction.create(input)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     });
   });
 
@@ -425,16 +470,17 @@ describe("appRouter", () => {
   describe("risk.createAlert", () => {
     it("creates an alert with severity/type/message", async () => {
       const alert = { id: "a-1" };
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       mocks.prisma.riskAlert.create.mockResolvedValue(alert);
-      const result = await caller.risk.createAlert({
-        vaultId: "v-1",
+      const result = await authCaller.risk.createAlert({
+        vaultId: "vault-1",
         severity: "CRITICAL",
         type: "RISK_THRESHOLD",
         message: "Score 90/100",
       });
       expect(mocks.prisma.riskAlert.create).toHaveBeenCalledWith({
         data: {
-          vaultId: "v-1",
+          vaultId: "vault-1",
           severity: "CRITICAL",
           type: "RISK_THRESHOLD",
           message: "Score 90/100",
@@ -444,29 +490,47 @@ describe("appRouter", () => {
     });
 
     it("rejects an invalid severity", async () => {
+      mocks.prisma.vault.findUnique.mockResolvedValue(sampleVault);
       await expect(
-        caller.risk.createAlert({ vaultId: "v", severity: "MEH" as any, type: "t", message: "m" })
+        authCaller.risk.createAlert({ vaultId: "vault-1", severity: "MEH" as any, type: "t", message: "m" })
       ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    });
+
+    it("rejects unauthenticated calls", async () => {
+      await expect(
+        caller.risk.createAlert({ vaultId: "v", severity: "HIGH", type: "t", message: "m" })
+      ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     });
   });
 
   describe("risk.resolveAlert", () => {
     it("marks the alert resolved with a resolvedAt timestamp", async () => {
+      const existing = { id: "a-1", resolved: false, vault: { userId: "0x1234567890abcdef1234567890abcdef12345678" } };
       const resolved = { id: "a-1", resolved: true, resolvedAt: new Date() };
+      mocks.prisma.riskAlert.findUnique.mockResolvedValue(existing);
       mocks.prisma.riskAlert.update.mockResolvedValue(resolved);
-      await caller.risk.resolveAlert({ id: "a-1" });
+      await authCaller.risk.resolveAlert({ id: "a-1" });
       const payload = mocks.prisma.riskAlert.update.mock.calls[0][0] as any;
       expect(payload).toEqual({
         where: { id: "a-1" },
         data: { resolved: true, resolvedAt: expect.any(Date) },
       });
     });
+
+    it("throws NOT_FOUND for unknown alert", async () => {
+      mocks.prisma.riskAlert.findUnique.mockResolvedValue(null);
+      await expect(authCaller.risk.resolveAlert({ id: "missing" })).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+
+    it("rejects unauthenticated calls", async () => {
+      await expect(caller.risk.resolveAlert({ id: "a-1" })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    });
   });
 
   describe("risk.getLiveScore", () => {
     it("returns health and risk score from the oracle", async () => {
       mocks.riskOracleContract.checkHealth.mockResolvedValue([true, 12n]);
-      const result = await caller.risk.getLiveScore({ riskOracleAddress: "0xabc" });
+      const result = await caller.risk.getLiveScore({ riskOracleAddress: "0xF36CB7f4c8D7E267FFfEEa33D0757e1A5a94C3cd" });
       expect(result).toEqual({ healthy: true, riskScore: "12" });
       expect(mocks.riskOracleContract.checkHealth).toHaveBeenCalled();
     });

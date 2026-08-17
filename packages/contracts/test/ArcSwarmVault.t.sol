@@ -2,7 +2,6 @@
 pragma solidity ^0.8.26;
 
 import "forge-std/Test.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../src/ArcSwarmVault.sol";
 import "../src/AgentBudgetManager.sol";
 import "../src/RiskOracle.sol";
@@ -104,7 +103,7 @@ contract ArcSwarmVaultTest is Test {
         vm.startPrank(alice);
         usdc.approve(address(vault), 1e6);
 
-        vm.expectRevert("Below minimum deposit");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.BelowMinimumDeposit.selector));
         vault.deposit(1e6 - 1);
         vm.stopPrank();
     }
@@ -125,7 +124,7 @@ contract ArcSwarmVaultTest is Test {
         vm.startPrank(alice);
         usdc.approve(address(vault), 10_000e6);
 
-        vm.expectRevert("System paused");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.SystemPaused.selector));
         vault.deposit(10_000e6);
         vm.stopPrank();
     }
@@ -172,7 +171,7 @@ contract ArcSwarmVaultTest is Test {
 
     function testWithdraw_ZeroAmountReverts() public {
         vm.prank(alice);
-        vm.expectRevert("Zero amount");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.ZeroAmount.selector));
         vault.withdraw(0);
     }
 
@@ -181,14 +180,14 @@ contract ArcSwarmVaultTest is Test {
         usdc.approve(address(vault), 5_000e6);
         vault.deposit(5_000e6);
 
-        vm.expectRevert("Insufficient deposit");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.InsufficientDeposit.selector));
         vault.withdraw(5_000e6 + 1);
         vm.stopPrank();
     }
 
     function testWithdraw_WithoutDepositReverts() public {
         vm.prank(alice);
-        vm.expectRevert("Insufficient deposit");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.InsufficientDeposit.selector));
         vault.withdraw(1e6);
     }
 
@@ -214,7 +213,7 @@ contract ArcSwarmVaultTest is Test {
         vm.stopPrank();
 
         vm.prank(bob);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.NotCoordinator.selector));
         vault.allocateToAgent(yieldAgent, 1_000e6);
     }
 
@@ -224,7 +223,7 @@ contract ArcSwarmVaultTest is Test {
         vault.deposit(10_000e6);
         vm.stopPrank();
 
-        vm.expectRevert("Agent not registered");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.AgentNotRegistered.selector));
         vault.allocateToAgent(unregisteredAgent, 1_000e6);
     }
 
@@ -235,7 +234,7 @@ contract ArcSwarmVaultTest is Test {
         vm.stopPrank();
 
         // No amount check in the vault; the budget manager enforces it.
-        vm.expectRevert("Zero allocation");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.ZeroAllocation.selector));
         vault.allocateToAgent(yieldAgent, 0);
     }
 
@@ -245,7 +244,7 @@ contract ArcSwarmVaultTest is Test {
         vault.deposit(1_000e6);
         vm.stopPrank();
 
-        vm.expectRevert("Insufficient vault balance");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.InsufficientVaultBalance.selector));
         vault.allocateToAgent(yieldAgent, 1_000e6 + 1);
     }
 
@@ -257,7 +256,7 @@ contract ArcSwarmVaultTest is Test {
 
         riskOracle.updateMetrics(150_000e6, 600);
 
-        vm.expectRevert("System paused");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.SystemPaused.selector));
         vault.allocateToAgent(yieldAgent, 1_000e6);
     }
 
@@ -287,7 +286,7 @@ contract ArcSwarmVaultTest is Test {
         vault.allocateToAgent(yieldAgent, 3_000e6);
 
         // Second allocation within the budget manager's 60s cooldown.
-        vm.expectRevert("Allocation cooldown");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AllocationCooldown.selector));
         vault.allocateToAgent(yieldAgent, 3_000e6);
 
         // After 60s the allocation is allowed again.
@@ -309,7 +308,7 @@ contract ArcSwarmVaultTest is Test {
 
         // 59s later still blocked.
         vm.warp(first + 59);
-        vm.expectRevert("Allocation cooldown");
+        vm.expectRevert(abi.encodeWithSelector(AgentBudgetManager.AllocationCooldown.selector));
         vault.allocateToAgent(yieldAgent, 1_000e6);
 
         // Exactly at 60s allowed.
@@ -330,7 +329,7 @@ contract ArcSwarmVaultTest is Test {
         riskOracle.updateMetrics(150_000e6, 600);
 
         vm.prank(bob);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.NotCoordinator.selector));
         vault.emergencyWithdraw(1_000e6);
     }
 
@@ -340,7 +339,7 @@ contract ArcSwarmVaultTest is Test {
         vault.deposit(10_000e6);
         vm.stopPrank();
 
-        vm.expectRevert("System not paused");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.SystemNotPaused.selector));
         vault.emergencyWithdraw(1_000e6);
     }
 
@@ -369,7 +368,7 @@ contract ArcSwarmVaultTest is Test {
 
         riskOracle.updateMetrics(150_000e6, 600);
 
-        vm.expectRevert("Insufficient balance");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.InsufficientVaultBalance.selector));
         vault.emergencyWithdraw(1_000e6 + 1);
     }
 
@@ -429,7 +428,14 @@ contract ArcSwarmVaultTest is Test {
 
     function testHarvestYield_OnlyCoordinator() public {
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.NotCoordinator.selector));
         vault.harvestYield(1_000e6);
+    }
+
+    // ---------- constructor ----------
+
+    function testConstructor_ZeroAddressReverts() public {
+        vm.expectRevert(abi.encodeWithSelector(ArcSwarmVault.ZeroAddress.selector));
+        new ArcSwarmVault(address(0), address(budgetManager), address(riskOracle));
     }
 }

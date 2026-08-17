@@ -1,6 +1,10 @@
 // Circle App Kits Client Wrapper
 // Mock implementation for hackathon - replace with @circle-fin/app-kits when available
 
+import pino from "pino";
+
+const logger = pino({ transport: { target: "pino-pretty" } });
+
 interface SwapParams {
   fromToken: string
   toToken: string
@@ -32,23 +36,25 @@ export class CircleAppKits {
   }
 
   async swap(params: SwapParams): Promise<{ transactionHash: string }> {
-    console.log('[Circle App Kits] Swap:', params)
-    // In production: call Circle App Kits Swap API
-    // For demo: simulate successful swap
+    if (!this.config.apiKey || this.config.apiKey === 'mock-key') {
+      throw new Error('Circle API key not configured');
+    }
+    logger.info({ fromToken: params.fromToken, toToken: params.toToken, amount: params.amount }, "Circle App Kits Swap");
     await new Promise(r => setTimeout(r, 1000))
     return { transactionHash: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('') }
   }
 
   async send(params: SendParams): Promise<{ transactionHash: string }> {
-    console.log('[Circle App Kits] Send:', params)
-    // In production: call Circle App Kits Send API
+    if (!this.config.apiKey || this.config.apiKey === 'mock-key') {
+      throw new Error('Circle API key not configured');
+    }
+    logger.info({ to: params.to, amount: params.amount, token: params.token }, "Circle App Kits Send");
     await new Promise(r => setTimeout(r, 1000))
     return { transactionHash: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('') }
   }
 
   async getUnifiedBalance(params: BalanceParams): Promise<{ balance: string; chains: Record<string, string> }> {
-    console.log('[Circle App Kits] Get Unified Balance:', params)
-    // In production: call Circle App Kits Unified Balance API
+    logger.info("Circle App Kits Get Unified Balance");
     return {
       balance: '100000',
       chains: { ethereum: '50000', base: '30000', arbitrum: '20000' },
@@ -56,15 +62,22 @@ export class CircleAppKits {
   }
 
   async bridge(params: { fromChain: string; toChain: string; amount: string; walletAddress: string }): Promise<{ transactionHash: string }> {
-    console.log('[Circle App Kits] Bridge:', params)
+    if (!this.config.apiKey || this.config.apiKey === 'mock-key') {
+      throw new Error('Circle API key not configured');
+    }
+    logger.info({ fromChain: params.fromChain, toChain: params.toChain, amount: params.amount }, "Circle App Kits Bridge");
     await new Promise(r => setTimeout(r, 2000))
     return { transactionHash: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('') }
   }
 }
 
 export function createCircleAppKits(): CircleAppKits {
+  const apiKey = process.env.CIRCLE_API_KEY;
+  if (!apiKey) {
+    logger.warn("CIRCLE_API_KEY not set — Circle App Kits will not work");
+  }
   return new CircleAppKits({
-    apiKey: process.env.CIRCLE_API_KEY || 'mock-key',
+    apiKey: apiKey || 'mock-key',
     entitySecret: process.env.CIRCLE_ENTITY_SECRET,
   })
 }

@@ -53,9 +53,53 @@ pnpm --filter @arcswarm/shared test      # Shared ABI/config tests
 - **Test-only discipline:** the dedicated `test-engineer` subagent writes tests; production code is never modified by test work. Bugs found while testing are reported, not silently fixed.
 - Use `vm.prank`/`vm.warp`/`vm.assume` in Forge; mock Prisma/ethers in vitest (no live network or DB).
 
-## Test Engineer Agent
+## Subagents
 
-A dedicated subagent (`test-engineer`, defined in `.opencode/agent/test-engineer.md`) owns all testing work. Invoke it for writing/extending/auditing tests across any surface. It reports files added, functions covered, test counts, and any product bugs discovered.
+All subagents are defined in `.opencode/agent/`. Invoke them by name when needed.
+
+### Test Engineer Agent
+A dedicated subagent (`test-engineer`) owns all testing work. Invoke it for writing/extending/auditing tests across any surface.
+
+### Security Agents
+| Agent | Purpose | When to Use |
+|-------|---------|-------------|
+| `security-blockchain-security-auditor` | Smart contract vulnerability detection, formal verification, audit reports | Before any contract deployment, after major contract changes |
+| `security-architect` | Threat modeling, trust-boundary analysis, secure-by-design architecture | New features, architectural decisions, security reviews |
+| `security-appsec-engineer` | Secure SDLC, code review, SAST/DAST integration | PR reviews, dependency audits, CI/CD security |
+| `security-penetration-tester` | Offensive security testing, exploit chain discovery | Pre-launch security assessment, red team exercises |
+
+### Engineering Agents
+| Agent | Purpose | When to Use |
+|-------|---------|-------------|
+| `engineering-solidity-smart-contract-engineer` | Secure Solidity development, gas optimization, DeFi patterns | Writing/modifying any `.sol` files |
+| `engineering-multi-agent-systems-architect` | Agent topology, failure modes, context management, HITL design | Agent swarm architecture decisions |
+| `engineering-backend-architect` | System design, database architecture, API design, reliability | Backend architecture, scaling decisions |
+| `engineering-payments-billing-engineer` | Payment flows, idempotency, webhook processing, reconciliation | PaymentRouter, x402 integration, USDC flows |
+| `engineering-identity-access-engineer` | Auth systems, RBAC, identity management, access control | AgentRegistry, ERC-8004 identity, permissioning |
+| `engineering-devops-automator` | CI/CD, deployment, infrastructure automation | Build pipelines, deployment, monitoring setup |
+| `engineering-code-reviewer` | Code quality, patterns, best practices | PR reviews, refactoring guidance |
+| `engineering-software-architect` | High-level architecture, system boundaries | Major architectural decisions |
+
+### Marketing & Growth Agents
+| Agent | Purpose | When to Use |
+|-------|---------|-------------|
+| `marketing-content-creator` | Content strategy, editorial calendars, multi-platform content | Blog posts, docs, launch content |
+| `marketing-social-media-strategist` | Cross-platform campaigns, LinkedIn/Twitter strategy | Community building, thought leadership |
+| `marketing-seo-specialist` | Technical SEO, content optimization, organic search | Website visibility, content discoverability |
+| `marketing-pr-communications-manager` | Media relations, press releases, crisis comms | Product launches, announcements, incident comms |
+| `marketing-growth-hacker` | Growth loops, viral mechanics, user acquisition | Growth strategy, user funnel optimization |
+| `marketing-twitter-engager` | Twitter/X engagement, community management | Real-time social engagement |
+
+### Strategy & Coordination
+| File | Purpose |
+|------|---------|
+| `agent-activation-prompts` | Agent activation and initialization patterns |
+| `handoff-templates` | Inter-agent handoff protocols |
+| `phase-0-discovery` through `phase-6-operate` | Development lifecycle playbooks |
+| `scenario-startup-mvp` | MVP development playbook |
+| `scenario-incident-response` | Incident response playbook |
+| `scenario-marketing-campaign` | Marketing campaign playbook |
+| `scenario-enterprise-feature` | Enterprise feature development playbook |
 
 ## Arc/Circle Integration Points
 

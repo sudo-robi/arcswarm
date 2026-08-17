@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { BaseAgent, AgentConfig, AgentMessage } from "./base.js";
+import { BaseAgent, AgentConfig, AgentMessage, AGENT_CONSTANTS } from "./base.js";
 import { YieldAgent } from "./yield.js";
 import { LiquidityAgent } from "./liquidity.js";
 import { FXAgent } from "./fx.js";
@@ -9,6 +9,24 @@ import { CONTRACTS, AGENT_REGISTRY_ABI } from "@arcswarm/shared/contracts";
 import pino from "pino";
 
 const logger = pino({ transport: { target: "pino-pretty" } });
+
+const SWARM_INTERVALS = {
+  yield: 300_000,
+  liquidity: 3_600_000,
+  fx: 600_000,
+  payment: 60_000,
+  risk: 60_000,
+} as const;
+
+const ALLOCATION_PCT = {
+  yield: 0.3,
+  liquidity: 0.15,
+  fx: 0.2,
+  payment: 0.25,
+  risk: 0.1,
+} as const;
+
+const TOTAL_SWARM_BUDGET = 100_000e6;
 
 interface AgentStatus {
   name: string;
@@ -138,13 +156,12 @@ export class CoordinatorAgent extends BaseAgent {
   }
 
   private async allocateBudgets(): Promise<void> {
-    const totalBudget = 100_000e6;
     const allocations: Record<string, number> = {
-      yield: totalBudget * 0.3,
-      liquidity: totalBudget * 0.15,
-      fx: totalBudget * 0.2,
-      payment: totalBudget * 0.25,
-      risk: totalBudget * 0.1,
+      yield: TOTAL_SWARM_BUDGET * ALLOCATION_PCT.yield,
+      liquidity: TOTAL_SWARM_BUDGET * ALLOCATION_PCT.liquidity,
+      fx: TOTAL_SWARM_BUDGET * ALLOCATION_PCT.fx,
+      payment: TOTAL_SWARM_BUDGET * ALLOCATION_PCT.payment,
+      risk: TOTAL_SWARM_BUDGET * ALLOCATION_PCT.risk,
     };
 
     for (const [type, amount] of Object.entries(allocations)) {
@@ -194,7 +211,12 @@ export class CoordinatorAgent extends BaseAgent {
     if (msg.payload.action === "circuitBreakerTriggered") {
       logger.warn({ agent: this.config.name }, "Pausing all agents...");
       for (const [type, agent] of this.agents) {
-        agent.stop();
+        const result = agent.stop();
+        if (result && typeof (result as Promise<void>).catch === "function") {
+          await (result as Promise<void>).catch((err) => {
+            logger.error({ agent: this.config.name, type, err }, "Error stopping agent during critical alert");
+          });
+        }
         const status = this.agentStatuses.get(type);
         if (status) status.active = false;
       }
@@ -217,7 +239,9 @@ export class CoordinatorAgent extends BaseAgent {
 
     for (const [type, agent] of this.agents) {
       logger.info({ agent: this.config.name, type }, "Starting agent");
-      agent.start();
+      agent.start().catch((err) => {
+        logger.error({ agent: this.config.name, type, err }, "Agent crashed during start");
+      });
     }
 
     this.start();
@@ -225,9 +249,18 @@ export class CoordinatorAgent extends BaseAgent {
 
   async stopSwarm(): Promise<void> {
     logger.info({ agent: this.config.name }, "Stopping ArcSwarm...");
+    const stopPromises: Promise<void>[] = [];
     for (const [type, agent] of this.agents) {
-      agent.stop();
+      const result = agent.stop();
+      if (result && typeof (result as Promise<void>).catch === "function") {
+        stopPromises.push(
+          (result as Promise<void>).catch((err) => {
+            logger.error({ agent: this.config.name, type, err }, "Error stopping agent");
+          })
+        );
+      }
     }
-    this.stop();
+    await Promise.all(stopPromises);
+    await this.stop();
   }
 }

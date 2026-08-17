@@ -48,6 +48,7 @@ export function TreasuryOverview() {
           href={`https://testnet.arcscan.app/address/${VAULT_ADDRESS}`}
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="View vault on block explorer"
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
         >
           View on Explorer
@@ -81,6 +82,7 @@ export function TreasuryOverview() {
             href={`https://testnet.arcscan.app/address/${VAULT_ADDRESS}`}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="View vault contract on block explorer"
             className="font-mono text-xs text-muted-foreground hover:text-primary transition-colors"
           >
             {VAULT_ADDRESS}

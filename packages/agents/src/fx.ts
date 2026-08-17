@@ -1,9 +1,14 @@
-import { BaseAgent, AgentConfig, AgentMessage } from "./base.js";
+import { BaseAgent, AgentConfig, AgentMessage, AGENT_CONSTANTS } from "./base.js";
 import { CONTRACTS } from "@arcswarm/shared/contracts";
 import { ethers } from "ethers";
 import pino from "pino";
 
 const logger = pino({ transport: { target: "pino-pretty" } });
+
+const FX_CONSTANTS = {
+  SCAN_INTERVAL: 600_000,
+  SPREAD_THRESHOLD: 0.001,
+} as const;
 
 interface FXRate {
   pair: string;
@@ -15,7 +20,7 @@ interface FXRate {
 export class FXAgent extends BaseAgent {
   private rates: Map<string, FXRate> = new Map();
   private lastScan = 0;
-  private scanInterval = 600_000; // 10 minutes
+  private scanInterval = FX_CONSTANTS.SCAN_INTERVAL;
 
   async execute(): Promise<void> {
     if (Date.now() - this.lastScan < this.scanInterval) return;
@@ -26,11 +31,10 @@ export class FXAgent extends BaseAgent {
     const eurcRate = await this.fetchEURCRate();
     const spread = Math.abs(eurcRate - 1.0);
 
-    if (spread > 0.001) { // 0.1% spread
+    if (spread > FX_CONSTANTS.SPREAD_THRESHOLD) {
       logger.info({ agent: this.config.name, spread, rate: eurcRate }, "Arbitrage opportunity detected");
       
-      // Validate with Risk Agent via nanopayment
-      await this.sendNanopayment("0xRISK_AGENT", 1000, `fx-risk-check-eurc`);
+      await this.sendNanopayment("0xRISK_AGENT", AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, `fx-risk-check-eurc`);
       
       // Execute swap via Circle App Kits
       // In production: use @circle-fin/app-kit SwapKit for real EURC/USDC swaps
@@ -56,7 +60,7 @@ export class FXAgent extends BaseAgent {
 
   async handleMessage(msg: AgentMessage): Promise<void> {
     if (msg.type === "request" && msg.payload.action === "getRates") {
-      await this.sendNanopayment(msg.from, 1000, "fx-rates");
+      await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "fx-rates");
       await this.broadcastMessage("response", { rates: Object.fromEntries(this.rates) });
     }
   }

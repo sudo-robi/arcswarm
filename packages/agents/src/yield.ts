@@ -1,9 +1,15 @@
 import { ethers } from "ethers";
-import { BaseAgent, AgentConfig, AgentMessage } from "./base.js";
+import { BaseAgent, AgentConfig, AgentMessage, AGENT_CONSTANTS } from "./base.js";
 import { CONTRACTS } from "@arcswarm/shared/contracts";
 import pino from "pino";
 
 const logger = pino({ transport: { target: "pino-pretty" } });
+
+const YIELD_CONSTANTS = {
+  TOTAL_BUDGET: 15_000e6,
+  SCAN_INTERVAL: 300_000,
+  REBALANCE_DRIFT_THRESHOLD: 0.05,
+} as const;
 
 interface YieldSource {
   name: string;
@@ -25,7 +31,7 @@ export class YieldAgent extends BaseAgent {
   private yieldSources: YieldSource[] = [];
   private currentAllocations: YieldAllocation[] = [];
   private lastScan = 0;
-  private scanInterval = 300_000;
+  private scanInterval = YIELD_CONSTANTS.SCAN_INTERVAL;
 
   constructor(config: AgentConfig, provider: ethers.JsonRpcProvider) {
     super(config, provider);
@@ -50,7 +56,7 @@ export class YieldAgent extends BaseAgent {
       logger.info({ agent: this.config.name }, "Rebalancing allocations...");
       await this.rebalance(optimal);
 
-      await this.sendNanopayment("0xRISK_AGENT", 1000, "validate-yield-sources");
+      await this.sendNanopayment("0xRISK_AGENT", AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "validate-yield-sources");
 
       await this.broadcastMessage("response", {
         action: "rebalance_complete",
@@ -70,7 +76,7 @@ export class YieldAgent extends BaseAgent {
   }
 
   private calculateOptimalAllocation(scored: YieldSource[]): YieldAllocation[] {
-    const totalBudget = 15_000e6;
+    const totalBudget = YIELD_CONSTANTS.TOTAL_BUDGET;
     const allocations: YieldAllocation[] = [];
 
     let remaining = totalBudget;
@@ -98,7 +104,7 @@ export class YieldAgent extends BaseAgent {
       if (!current) return true;
       // Avoid division by zero: if opt.amount is 0, treat any difference as significant
       if (opt.amount === 0) return true;
-      if (Math.abs(current.amount - opt.amount) / opt.amount > 0.05) return true;
+      if (Math.abs(current.amount - opt.amount) / opt.amount > YIELD_CONSTANTS.REBALANCE_DRIFT_THRESHOLD) return true;
     }
     return false;
   }
@@ -124,7 +130,7 @@ export class YieldAgent extends BaseAgent {
     switch (msg.type) {
       case "request":
         if (msg.payload.action === "getAllocations") {
-          await this.sendNanopayment(msg.from, 1000, "allocation-data");
+          await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "allocation-data");
           await this.broadcastMessage("response", { allocations: this.currentAllocations });
         }
         break;

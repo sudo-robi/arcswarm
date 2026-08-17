@@ -1,15 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import { ethers } from "ethers";
+import pino from "pino";
 import {
   CONTRACTS,
   VAULT_ABI,
   PAYMENT_ROUTER_ABI,
   RISK_ORACLE_ABI,
   AGENT_REGISTRY_ABI,
+  RPC_URL,
 } from "./contracts.js";
 
+const logger = pino({ transport: { target: "pino-pretty" } });
+
 const prisma = new PrismaClient();
-const provider = new ethers.JsonRpcProvider("https://rpc.testnet.arc.network");
+const provider = new ethers.JsonRpcProvider(RPC_URL);
 
 const VAULT = new ethers.Contract(CONTRACTS.vault, VAULT_ABI, provider);
 const PAYMENT_ROUTER = new ethers.Contract(CONTRACTS.paymentRouter, PAYMENT_ROUTER_ABI, provider);
@@ -41,6 +45,15 @@ async function getAgentIdByWallet(wallet: string): Promise<string | null> {
   return agent?.id ?? null;
 }
 
+async function getBlockTimestamp(blockNumber: number): Promise<Date> {
+  const block = await provider.getBlock(blockNumber);
+  if (!block) {
+    logger.warn({ blockNumber }, "Block not found, using current time");
+    return new Date();
+  }
+  return new Date(block.timestamp * 1000);
+}
+
 async function indexVaultEvents(fromBlock: bigint, toBlock: bigint) {
   const vaultId = await getVaultId();
   if (!vaultId) return;
@@ -53,6 +66,10 @@ async function indexVaultEvents(fromBlock: bigint, toBlock: bigint) {
   ]);
 
   for (const e of deposits as ethers.EventLog[]) {
+    const existing = await prisma.transaction.findUnique({ where: { txHash: e.transactionHash } });
+    if (existing) continue;
+
+    const createdAt = await getBlockTimestamp(e.blockNumber);
     await prisma.transaction.create({
       data: {
         vaultId,
@@ -62,13 +79,17 @@ async function indexVaultEvents(fromBlock: bigint, toBlock: bigint) {
         type: "DEPOSIT",
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
-        createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+        createdAt,
       },
     });
     await prisma.vault.update({ where: { id: vaultId }, data: { totalDeposits: { increment: e.args.amount } } });
   }
 
   for (const e of withdrawals as ethers.EventLog[]) {
+    const existing = await prisma.transaction.findUnique({ where: { txHash: e.transactionHash } });
+    if (existing) continue;
+
+    const createdAt = await getBlockTimestamp(e.blockNumber);
     await prisma.transaction.create({
       data: {
         vaultId,
@@ -78,13 +99,17 @@ async function indexVaultEvents(fromBlock: bigint, toBlock: bigint) {
         type: "WITHDRAWAL",
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
-        createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+        createdAt,
       },
     });
     await prisma.vault.update({ where: { id: vaultId }, data: { totalDeposits: { decrement: e.args.amount } } });
   }
 
   for (const e of yields as ethers.EventLog[]) {
+    const existing = await prisma.transaction.findUnique({ where: { txHash: e.transactionHash } });
+    if (existing) continue;
+
+    const createdAt = await getBlockTimestamp(e.blockNumber);
     await prisma.transaction.create({
       data: {
         vaultId,
@@ -94,13 +119,17 @@ async function indexVaultEvents(fromBlock: bigint, toBlock: bigint) {
         type: "YIELD_HARVEST",
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
-        createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+        createdAt,
       },
     });
     await prisma.vault.update({ where: { id: vaultId }, data: { totalYield: { increment: e.args.amount } } });
   }
 
   for (const e of rebalances as ethers.EventLog[]) {
+    const existing = await prisma.transaction.findUnique({ where: { txHash: e.transactionHash } });
+    if (existing) continue;
+
+    const createdAt = await getBlockTimestamp(e.blockNumber);
     await prisma.transaction.create({
       data: {
         vaultId,
@@ -110,7 +139,7 @@ async function indexVaultEvents(fromBlock: bigint, toBlock: bigint) {
         type: "REBALANCE",
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
-        createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+        createdAt,
       },
     });
   }
@@ -127,7 +156,11 @@ async function indexPaymentRouterEvents(fromBlock: bigint, toBlock: bigint) {
   ]);
 
   for (const e of nanopayments as ethers.EventLog[]) {
+    const existing = await prisma.transaction.findUnique({ where: { txHash: e.transactionHash } });
+    if (existing) continue;
+
     const agentId = await getAgentIdByWallet(e.args.payer);
+    const createdAt = await getBlockTimestamp(e.blockNumber);
     await prisma.transaction.create({
       data: {
         vaultId,
@@ -139,13 +172,17 @@ async function indexPaymentRouterEvents(fromBlock: bigint, toBlock: bigint) {
         memo: e.args.serviceId,
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
-        createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+        createdAt,
       },
     });
   }
 
   for (const e of payments as ethers.EventLog[]) {
+    const existing = await prisma.transaction.findUnique({ where: { txHash: e.transactionHash } });
+    if (existing) continue;
+
     const agentId = await getAgentIdByWallet(e.args.from);
+    const createdAt = await getBlockTimestamp(e.blockNumber);
     await prisma.transaction.create({
       data: {
         vaultId,
@@ -156,13 +193,13 @@ async function indexPaymentRouterEvents(fromBlock: bigint, toBlock: bigint) {
         type: "PAYMENT",
         txHash: e.transactionHash,
         blockNumber: e.blockNumber,
-        createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+        createdAt,
       },
     });
   }
 
   for (const e of batches as ethers.EventLog[]) {
-    console.log(`Indexed batch: ${e.args.count} payments, ${e.args.totalAmount} USDC`);
+    logger.info({ count: e.args.count, totalAmount: e.args.totalAmount.toString() }, "Indexed batch payment event");
   }
 }
 
@@ -173,13 +210,14 @@ async function indexRiskOracleEvents(fromBlock: bigint, toBlock: bigint) {
   const checks = await RISK_ORACLE.queryFilter("RiskCheckCompleted", Number(fromBlock), Number(toBlock));
   for (const e of checks as ethers.EventLog[]) {
     if (e.args.riskScore >= 70n) {
+      const createdAt = await getBlockTimestamp(e.blockNumber);
       await prisma.riskAlert.create({
         data: {
           vaultId,
           severity: e.args.riskScore >= 80n ? "CRITICAL" : "HIGH",
           type: "RISK_THRESHOLD",
           message: `Risk score ${e.args.riskScore}/100`,
-          createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+          createdAt,
         },
       });
     }
@@ -187,26 +225,33 @@ async function indexRiskOracleEvents(fromBlock: bigint, toBlock: bigint) {
 
   const circuitBreakers = await RISK_ORACLE.queryFilter("CircuitBreakerTriggered", Number(fromBlock), Number(toBlock));
   for (const e of circuitBreakers as ethers.EventLog[]) {
+    const createdAt = await getBlockTimestamp(e.blockNumber);
     await prisma.riskAlert.create({
       data: {
         vaultId,
         severity: "CRITICAL",
         type: "CIRCUIT_BREAKER",
         message: `Circuit breaker triggered at risk score ${e.args.riskScore}`,
-        createdAt: new Date((await provider.getBlock(e.blockNumber))!.timestamp * 1000),
+        createdAt,
       },
     });
   }
 }
 
+const AGENT_TYPE_NAMES = ["YIELD", "LIQUIDITY", "FX", "PAYMENT", "RISK", "COORDINATOR"] as const;
+
 async function indexAgentRegistryEvents(fromBlock: bigint, toBlock: bigint) {
   const registered = await AGENT_REGISTRY.queryFilter("AgentRegistered", Number(fromBlock), Number(toBlock));
+  const vaultId = await getVaultId();
+  if (!vaultId) return;
+
   for (const e of registered as ethers.EventLog[]) {
+    const agentType = AGENT_TYPE_NAMES[Number(e.args.agentType)] ?? "COORDINATOR";
     await prisma.agent.upsert({
       where: { walletAddress: e.args.wallet.toLowerCase() },
       create: {
-        vaultId: (await getVaultId())!,
-        type: ["YIELD", "LIQUIDITY", "FX", "PAYMENT", "RISK", "COORDINATOR"][Number(e.args.agentType)] as "YIELD" | "LIQUIDITY" | "FX" | "PAYMENT" | "RISK" | "COORDINATOR",
+        vaultId,
+        type: agentType,
         walletAddress: e.args.wallet.toLowerCase(),
         budget: 0n,
         spent: 0n,
@@ -219,13 +264,19 @@ async function indexAgentRegistryEvents(fromBlock: bigint, toBlock: bigint) {
 async function runIndexer() {
   const lastBlock = await getLastIndexedBlock();
   const currentBlock = await provider.getBlockNumber();
+  const CONFIRMATIONS = 5;
+  const safeBlock = currentBlock - CONFIRMATIONS;
   const CHUNK = 2000;
 
-  console.log(`Indexing from block ${lastBlock} to ${currentBlock}`);
+  if (safeBlock <= Number(lastBlock)) {
+    return;
+  }
 
-  for (let from = Number(lastBlock) + 1; from <= currentBlock; from += CHUNK) {
-    const to = Math.min(from + CHUNK - 1, currentBlock);
-    console.log(`Indexing blocks ${from} - ${to}`);
+  logger.info({ from: lastBlock.toString(), to: safeBlock, confirmed: currentBlock }, "Indexing blocks");
+
+  for (let from = Number(lastBlock) + 1; from <= safeBlock; from += CHUNK) {
+    const to = Math.min(from + CHUNK - 1, safeBlock);
+    logger.debug({ from, to }, "Indexing chunk");
 
     await Promise.all([
       indexVaultEvents(BigInt(from), BigInt(to)),
@@ -238,5 +289,22 @@ async function runIndexer() {
   }
 }
 
-setInterval(runIndexer, 15_000);
-runIndexer();
+let isRunning = false;
+
+async function safeRunIndexer() {
+  if (isRunning) {
+    logger.debug("Indexer already running, skipping");
+    return;
+  }
+  isRunning = true;
+  try {
+    await runIndexer();
+  } catch (err) {
+    logger.error({ err }, "Indexer run failed");
+  } finally {
+    isRunning = false;
+  }
+}
+
+setInterval(safeRunIndexer, 15_000);
+safeRunIndexer();

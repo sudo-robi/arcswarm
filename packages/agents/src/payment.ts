@@ -1,8 +1,14 @@
-import { BaseAgent, AgentConfig, AgentMessage } from "./base.js";
+import { BaseAgent, AgentConfig, AgentMessage, AGENT_CONSTANTS } from "./base.js";
 import { CONTRACTS } from "@arcswarm/shared/contracts";
 import pino from "pino";
 
 const logger = pino({ transport: { target: "pino-pretty" } });
+
+const PAYMENT_CONSTANTS = {
+  PROCESS_INTERVAL: 60_000,
+  BATCH_SIZE: 10,
+  NANO_PAYMENT_THRESHOLD: 10_000,
+} as const;
 
 interface ScheduledPayment {
   id: string;
@@ -24,7 +30,7 @@ interface PaymentBatch {
 export class PaymentAgent extends BaseAgent {
   private scheduledPayments: ScheduledPayment[] = [];
   private lastProcess = 0;
-  private processInterval = 60_000;
+  private processInterval = PAYMENT_CONSTANTS.PROCESS_INTERVAL;
 
   async execute(): Promise<void> {
     if (Date.now() - this.lastProcess < this.processInterval) return;
@@ -44,7 +50,7 @@ export class PaymentAgent extends BaseAgent {
     const batches = this.batchPayments(duePayments);
     const totalNeeded = batches.reduce((sum, b) => sum + b.totalAmount, 0);
 
-    await this.sendNanopayment("0xLIQUIDITY_AGENT", 1000, `reserve-need-${totalNeeded}`);
+    await this.sendNanopayment("0xLIQUIDITY_AGENT", AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, `reserve-need-${totalNeeded}`);
 
     for (const batch of batches) {
       logger.info({ agent: this.config.name, count: batch.payments.length, total: batch.totalAmount / 1e6 }, "Executing batch");
@@ -60,7 +66,7 @@ export class PaymentAgent extends BaseAgent {
 
   private batchPayments(payments: ScheduledPayment[]): PaymentBatch[] {
     const batches: PaymentBatch[] = [];
-    const batchSize = 10;
+    const batchSize = PAYMENT_CONSTANTS.BATCH_SIZE;
 
     for (let i = 0; i < payments.length; i += batchSize) {
       const batch = payments.slice(i, i + batchSize);
@@ -78,7 +84,7 @@ export class PaymentAgent extends BaseAgent {
       try {
         logger.info({ agent: this.config.name, to: payment.recipient, amount: payment.amount / 1e6, memo: payment.memo }, "Processing payment");
 
-        if (payment.amount <= 10_000) { // ≤0.01 USDC = nanopayment
+        if (payment.amount <= PAYMENT_CONSTANTS.NANO_PAYMENT_THRESHOLD) {
           await this.sendNanopayment(payment.recipient, payment.amount, payment.memo);
         } else {
           // Large payment via PaymentRouter
@@ -120,10 +126,10 @@ export class PaymentAgent extends BaseAgent {
       case "request":
         if (msg.payload.action === "addPayment") {
           this.addScheduledPayment(msg.payload.payment);
-          await this.sendNanopayment(msg.from, 1000, "payment-confirmed");
+          await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "payment-confirmed");
         } else if (msg.payload.action === "getForecast") {
           const forecast = this.get7DayForecast();
-          await this.sendNanopayment(msg.from, 1000, "forecast-data");
+          await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "forecast-data");
           await this.broadcastMessage("response", { action: "paymentForecast", forecast });
         }
         break;

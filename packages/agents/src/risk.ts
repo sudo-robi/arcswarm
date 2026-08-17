@@ -1,9 +1,15 @@
 import { ethers } from "ethers";
-import { BaseAgent, AgentConfig, AgentMessage } from "./base.js";
+import { BaseAgent, AgentConfig, AgentMessage, AGENT_CONSTANTS } from "./base.js";
 import { CONTRACTS } from "@arcswarm/shared/contracts";
 import pino from "pino";
 
 const logger = pino({ transport: { target: "pino-pretty" } });
+
+const RISK_CONSTANTS = {
+  SCAN_INTERVAL: 60_000,
+  CIRCUIT_BREAKER_SCORE_THRESHOLD: 80,
+  RISK_SCORE_CAP: 100,
+} as const;
 
 interface RiskAlert {
   id: string;
@@ -30,7 +36,7 @@ export class RiskAgent extends BaseAgent {
     { name: "unusual_outflow", threshold: 10, window: 600_000, count: 0, lastSeen: 0 },
   ];
   private lastScan = 0;
-  private scanInterval = 60_000;
+  private scanInterval = RISK_CONSTANTS.SCAN_INTERVAL;
 
   async execute(): Promise<void> {
     if (Date.now() - this.lastScan < this.scanInterval) return;
@@ -55,7 +61,7 @@ export class RiskAgent extends BaseAgent {
       logger.error({ agent: this.config.name, err }, "Failed to update RiskOracle");
     }
 
-    if (riskScore >= 80) {
+    if (riskScore >= RISK_CONSTANTS.CIRCUIT_BREAKER_SCORE_THRESHOLD) {
       await this.triggerCircuitBreaker(riskScore);
     }
 
@@ -111,7 +117,7 @@ export class RiskAgent extends BaseAgent {
     score += (100 - walletHealth) * 0.3;
     score += yieldHealth.drawdown * 10; // drawdown is already a percentage
     score += Math.min(anomalies.length * 20, 40);
-    return Math.min(Math.round(score), 100);
+    return Math.min(Math.round(score), RISK_CONSTANTS.RISK_SCORE_CAP);
   }
 
   private createAlert(severity: RiskAlert["severity"], type: string, message: string) {
@@ -153,7 +159,7 @@ export class RiskAgent extends BaseAgent {
       case "request":
         if (msg.payload.action === "validateYieldSource") {
           const isValid = await this.validateYieldSource(msg.payload.source);
-          await this.sendNanopayment(msg.from, 1000, "validation-result");
+          await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "validation-result");
           await this.broadcastMessage("response", {
             action: "validationResult",
             source: msg.payload.source,
@@ -161,7 +167,7 @@ export class RiskAgent extends BaseAgent {
           });
         } else if (msg.payload.action === "checkFxRisk") {
           const risk = this.assessFxRisk(msg.payload.pair);
-          await this.sendNanopayment(msg.from, 1000, "fx-risk-assessment");
+          await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "fx-risk-assessment");
           await this.broadcastMessage("response", {
             action: "fxRiskAssessment",
             pair: msg.payload.pair,

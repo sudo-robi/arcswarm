@@ -23,7 +23,7 @@ contract RiskOracleTest is Test {
 
     function testUpdateMetrics_OnlyRiskAgentReverts() public {
         vm.prank(alice);
-        vm.expectRevert("Not risk agent");
+        vm.expectRevert(abi.encodeWithSelector(RiskOracle.NotRiskAgent.selector));
         oracle.updateMetrics(50_000e6, 100);
     }
 
@@ -141,7 +141,7 @@ contract RiskOracleTest is Test {
         oracle.updateMetrics(150_000e6, 600);
 
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(RiskOracle.NotCoordinator.selector));
         oracle.releaseCircuitBreaker();
     }
 
@@ -149,7 +149,7 @@ contract RiskOracleTest is Test {
 
     function testAddRiskAgent_OnlyCoordinator() public {
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(RiskOracle.NotCoordinator.selector));
         oracle.addRiskAgent(riskAgent);
     }
 
@@ -183,7 +183,7 @@ contract RiskOracleTest is Test {
         oracle.addRiskAgent(riskAgent);
 
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(RiskOracle.NotCoordinator.selector));
         oracle.removeRiskAgent(riskAgent);
     }
 
@@ -210,7 +210,7 @@ contract RiskOracleTest is Test {
 
     function testSetThreshold_OnlyCoordinator() public {
         vm.prank(alice);
-        vm.expectRevert("Not coordinator");
+        vm.expectRevert(abi.encodeWithSelector(RiskOracle.NotCoordinator.selector));
         oracle.setThreshold(100, 100, 1e6, 60);
     }
 

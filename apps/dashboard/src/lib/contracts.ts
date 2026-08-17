@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 
 const ARC_RPC = 'https://rpc.testnet.arc.network'
+const USDC_DECIMALS = 6
 
 export const VAULT_ADDRESS = '0x68c104C39B8f8B0a0C7FA8Dec094b5eFD655AB3C'
 export const AGENT_REGISTRY_ADDRESS = '0xD168D3185E1A972b32719169e42Bb949De61B6d9'
@@ -147,9 +148,9 @@ export async function fetchVaultData(): Promise<VaultData> {
   } catch { /* ignore */ }
 
   return {
-    balance: ethers.formatUnits(balance, 6),
-    totalDeposits: ethers.formatUnits(totalDeposits, 6),
-    totalYield: ethers.formatUnits(totalYield, 6),
+    balance: ethers.formatUnits(balance, USDC_DECIMALS),
+    totalDeposits: ethers.formatUnits(totalDeposits, USDC_DECIMALS),
+    totalYield: ethers.formatUnits(totalYield, USDC_DECIMALS),
     depositorCount: Number(depositorCount),
   }
 }
@@ -210,8 +211,8 @@ export async function fetchRiskMetrics(): Promise<RiskMetrics> {
     return {
       healthy: !metrics.circuitBreakerActive,
       riskScore: metrics.riskScore.toString(),
-      totalExposure: ethers.formatUnits(metrics.totalExposure, 6),
-      currentDrawdown: ethers.formatUnits(metrics.currentDrawdown, 6),
+      totalExposure: ethers.formatUnits(metrics.totalExposure, USDC_DECIMALS),
+      currentDrawdown: ethers.formatUnits(metrics.currentDrawdown, USDC_DECIMALS),
       paused,
     }
   } catch { /* continue to fallback */ }
