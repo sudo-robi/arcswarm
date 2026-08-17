@@ -125,7 +125,7 @@ export class PaymentAgent extends BaseAgent {
     switch (msg.type) {
       case "request":
         if (msg.payload.action === "addPayment") {
-          this.addScheduledPayment(msg.payload.payment);
+          this.addScheduledPayment(msg.payload.payment as Omit<ScheduledPayment, "executed">);
           await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "payment-confirmed");
         } else if (msg.payload.action === "getForecast") {
           const forecast = this.get7DayForecast();

@@ -158,7 +158,7 @@ export class RiskAgent extends BaseAgent {
     switch (msg.type) {
       case "request":
         if (msg.payload.action === "validateYieldSource") {
-          const isValid = await this.validateYieldSource(msg.payload.source);
+          const isValid = await this.validateYieldSource(msg.payload.source as string);
           await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "validation-result");
           await this.broadcastMessage("response", {
             action: "validationResult",
@@ -166,7 +166,7 @@ export class RiskAgent extends BaseAgent {
             valid: isValid,
           });
         } else if (msg.payload.action === "checkFxRisk") {
-          const risk = this.assessFxRisk(msg.payload.pair);
+          const risk = this.assessFxRisk(msg.payload.pair as string);
           await this.sendNanopayment(msg.from, AGENT_CONSTANTS.DEFAULT_NANOPAYMENT, "fx-risk-assessment");
           await this.broadcastMessage("response", {
             action: "fxRiskAssessment",
